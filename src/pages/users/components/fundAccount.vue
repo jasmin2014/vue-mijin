@@ -5,14 +5,16 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="日期">
-            <el-date-picker v-model="appDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期" end-placeholder="结束日期"
-              clearable>
+            <el-date-picker v-model="appDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            clearable>
             </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item label="交易类型">
-            <mj-select v-model="search.feeType" :kind="this.$enum.FEE_TYPE" :group="this.$enum.FEE_TYPE" :sequence=[0,1,2,3,8,12,13,14] clearable>
+            <mj-select v-model="search.feeType" :kind="this.$enum.FEE_TYPE" :group="this.$enum.FEE_TYPE"
+                       :sequence=[0,1,2,3,8,12,14,19,22,23,24] clearable>
             </mj-select>
           </el-form-item>
         </el-col>
@@ -26,8 +28,9 @@
 
     <el-row>
       <el-table :data="currentValue.list" border>
-        <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter" :key="index"
-          align="center"></el-table-column>
+        <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter"
+                         :key="index"
+                         align="center"></el-table-column>
         <!-- <el-table-column label="操作" align="center" width="120">
           <template slot-scope="scope">
             <el-tooltip content="查看">
@@ -40,7 +43,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="handleChange"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
     <!--弹框-->
@@ -113,7 +122,8 @@
         account: {},
         pageTotal: 0,
         currentValue: {},
-        table: [{
+        table: [
+          {
             label: '交易成功时间',
             prop: 'successTime'
           },
@@ -144,7 +154,7 @@
       }
     },
     watch: {
-      'value' (val) {
+      'value'(val) {
         if (val) {
           this.currentValue = val;
           this.pageTotal = val.totalRecord;
@@ -174,23 +184,37 @@
         }
       }
     },
-    created () {
+    created() {
       this.search.partyId = this.$route.params.id;
     },
     methods: {
       handleSearch() {
+        this.search.pageNumber = 1;
         this.$emit('search', this.search);
       },
-      handleChange(val) {
-        this.search.pageNumber = val;
+      handleCurrentChange(val) {
+        this.search.pageNumber = val
         this.$emit('search', this.search);
+        // this.getData(this.search.pageSize,val);
       },
+      handleSizeChange(val) {
+        this.search.pageSize = val
+        this.$emit('search', this.search);
+        // this.getData(val,this.search.pageNumber)
+      },
+      // handleChange(val) {
+      //   this.search.pageNumber = val;
+      //   this.$emit('search', this.search);
+      // },
       handleDetail(row) {
         this.dialog = true;
       },
-      handleSave() {},
-      handleCancel() {},
-      handleDialogClose() {}
+      handleSave() {
+      },
+      handleCancel() {
+      },
+      handleDialogClose() {
+      }
     }
   }
 

@@ -8,9 +8,14 @@
             <el-input v-model="search.mobile" placeholder="登录手机号" clearable></el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="6">
           <el-form-item label="姓名">
             <el-input v-model="search.name" placeholder="姓名" clearable></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="工号">
+            <el-input v-model="search.jobNumber" placeholder="工号" clearable></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="4">
@@ -32,7 +37,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="handleChange"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
     <!--添加 编辑 查看-->
@@ -63,13 +74,19 @@
         search: {
           mobile: '',
           name: '',
+          jobNumber:'',
           pageSize: 10,
           pageNumber: 1
         },
         accountTitle: '',
         pageTotal: 0,
         list: [],
-        table: [{
+        table: [
+          {
+            label: '工号',
+            prop: 'jobNumber'
+          },
+          {
             label: '登录手机号码',
             prop: 'mobile'
           },
@@ -86,16 +103,22 @@
       }
     },
     methods: {
-      handleSearch() {
-        this.getManageList();
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      handleChange(index) {
-        this.search.pageNumber = index;
-        this.getManageList();
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleVisible() {
         this.showDialog = false;
-        this.getManageList();
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleEdit(row) {
         this.dialogTitle = '修改账号';
@@ -105,15 +128,18 @@
           this.detail = res.data.body;
         })
       },
-      getManageList() {
-        getManageList(this.search).then(res => {
+      getData(pageSize,pageNum) {
+        const search = this.$deepcopy(this.search);
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        getManageList(search).then(res => {
           this.list = res.data.body.list;
           this.pageTotal = res.data.body.totalRecord;
         })
       }
     },
     created() {
-      this.getManageList();
+      this.getData(this.search.pageSize,this.search.pageNumber)
     }
   }
 

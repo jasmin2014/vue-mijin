@@ -52,211 +52,218 @@
 </template>
 
 <script>
-  import {getLoginUser, logout} from '../../api/user';
+import { getLoginUser, logout } from "../../api/user";
 
-  export default {
-    name: 'MjHeader',
-    props: {
-      title: String
-    },
-    data() {
-      return {
-        user: {},
-      }
-    },
-    computed: {},
-    created() {
-      this.getUserInfo();
-    },
-    methods: {
-      handleExit() {
-        this.$confirm('您确定要退出账号?', '退出提示', {
-          cancelButtonText: '取消',
-          confirmButtonText: '确定',
-          type: 'warning'
-        }).then(() => {
+export default {
+  name: "MjHeader",
+  props: {
+    title: String
+  },
+  data() {
+    return {
+      user: {}
+    };
+  },
+  computed: {},
+  created() {
+    this.getUserInfo();
+  },
+  methods: {
+    handleExit() {
+      this.$confirm("您确定要退出账号?", "退出提示", {
+        cancelButtonText: "取消",
+        confirmButtonText: "确定",
+        type: "warning"
+      })
+        .then(() => {
           this.$logout(() => {
-            this.$removeLocalStorage('token');
-            this.$removeLocalStorage('user');
-            this.$removeLocalStorage('routes');
-            this.$router.push({name: 'LoginPage'});
-          })
-        }).catch(() => {
-        });
-      },
-      getUserInfo() {
-        getLoginUser().then(({data}) => {
+            this.$removeLocalStorage("token");
+            this.$removeLocalStorage("user");
+            this.$removeLocalStorage("routes");
+            this.$router.push({ name: "LoginPage" });
+          });
+        })
+        .catch(() => {});
+    },
+    getUserInfo() {
+      getLoginUser()
+        .then(({ data }) => {
           if (data.code === 200) {
             const user = data.body;
             if (user) {
               this.user = user;
-              this.$setLocalStorage('user', user);
+              this.$setLocalStorage("user", user);
+              /** 调用电话号码埋点方法 **/
+              this.$doDCP();
             }
           }
-        }).catch((response) => {
+        })
+        .catch(response => {
           if (!response || response.status !== 401) {
             this.$logout(() => {
-              this.$router.push({name: 'LoginPage'})
-            })
+              this.$router.push({ name: "LoginPage" });
+            });
           }
         });
-      }
     }
-  };
+  }
+};
 </script>
 
 <style lang="scss">
-  .header {
-    width: 100%;
-    height: 60px;
-    color: #ffffff;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+.header {
+  width: 100%;
+  height: 60px;
+  color: #ffffff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+
+  .logo {
+    display: inline-block;
+    width: 200px;
+    height: 100%;
+    text-align: center;
     background: #ffffff;
 
-    .logo {
-      display: inline-block;
-      width: 200px;
+    a {
+      vertical-align: middle;
+      display: block;
       height: 100%;
-      text-align: center;
-      background: #ffffff;
 
-      a {
+      &:after {
+        content: "";
         vertical-align: middle;
-        display: block;
-        height: 100%;
+        display: inline;
+        line-height: 60px;
+      }
 
-        &:after {
-          content: '';
-          vertical-align: middle;
-          display: inline;
-          line-height: 60px;
-        }
-
-        img {
-          vertical-align: middle;
-        }
+      img {
+        vertical-align: middle;
       }
     }
+  }
 
-    .title {
-      display: inline-block;
-      margin-left: 20px;
+  .title {
+    display: inline-block;
+    margin-left: 20px;
 
+    h2 {
+      margin: 0;
+      padding-left: 20px;
+      width: 180px;
+      height: 38px;
+      line-height: 38px;
+      font-size: 14px;
+      font-weight: normal;
+      border-radius: 4px;
+      background: #f2f6fa;
+      color: #868d9a;
+    }
+
+    &.dropdown {
       h2 {
-        margin: 0;
-        padding-left: 20px;
-        width: 180px;
-        height: 38px;
-        line-height: 38px;
-        font-size: 14px;
-        font-weight: normal;
-        border-radius: 4px;
-        background: #f2f6fa;
-        color: #868d9a;
-      }
+        position: relative;
+        cursor: pointer;
 
-      &.dropdown {
-        h2 {
-          position: relative;
-          cursor: pointer;
-
-          &:before {
-            position: absolute;
-            right: 15px;
-          }
+        &:before {
+          position: absolute;
+          right: 15px;
         }
       }
     }
+  }
 
-    .toolbar {
-      float: right;
-      margin-right: 40px;
-      height: 60px;
+  .toolbar {
+    float: right;
+    margin-right: 40px;
+    height: 60px;
 
-      .download {
-        float: left;
-        width: 70px;
+    .download {
+      float: left;
+      width: 70px;
+      height: 100%;
+      border-left: 1px solid #e3e7ee;
+      border-right: 1px solid #e3e7ee;
+
+      & > i {
+        line-height: 60px;
+      }
+    }
+
+    .user {
+      float: left;
+      height: 100%;
+      border-right: 1px solid #e3e7ee;
+
+      .user-info {
+        position: relative;
+        text-align: left;
+        padding: 10px;
+        width: 180px;
         height: 100%;
-        border-left: 1px solid #e3e7ee;
-        border-right: 1px solid #e3e7ee;
+        cursor: pointer;
 
-        & > i {
+        /*.avatar {*/
+        /*position: absolute;*/
+        /*overflow: hidden;*/
+        /*left: 10px;*/
+        /*top: 10px;*/
+        /*width: 40px;*/
+        /*height: 40px;*/
+        /*border-radius: 50%;*/
+
+        /*img {*/
+        /*display: block;*/
+        /*width: 100%;*/
+        /*height: 100%;*/
+        /*background: #e5e5e5;*/
+        /*}*/
+        /*}*/
+
+        .avatar {
+          display: none;
+        }
+
+        .info {
+          /*margin-left: 50px;*/
+          margin-right: 25px;
+          line-height: 1.5;
+
+          p {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            margin: 0;
+          }
+
+          .username {
+            font-size: 14px;
+            color: #333333;
+          }
+
+          .company,
+          .phone {
+            font-size: 12px;
+            color: #868d9a;
+          }
+        }
+
+        .dropdown-arrow {
+          position: absolute;
+          display: block;
+          top: 0;
+          right: 10px;
+          height: 100%;
           line-height: 60px;
         }
       }
-
-      .user {
-        float: left;
-        height: 100%;
-        border-right: 1px solid #e3e7ee;
-
-        .user-info {
-          position: relative;
-          text-align: left;
-          padding: 10px;
-          width: 180px;
-          height: 100%;
-          cursor: pointer;
-
-          /*.avatar {*/
-          /*position: absolute;*/
-          /*overflow: hidden;*/
-          /*left: 10px;*/
-          /*top: 10px;*/
-          /*width: 40px;*/
-          /*height: 40px;*/
-          /*border-radius: 50%;*/
-
-          /*img {*/
-          /*display: block;*/
-          /*width: 100%;*/
-          /*height: 100%;*/
-          /*background: #e5e5e5;*/
-          /*}*/
-          /*}*/
-
-          .avatar {
-            display: none;
-          }
-
-          .info {
-            /*margin-left: 50px;*/
-            margin-right: 25px;
-            line-height: 1.5;
-
-            p {
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              margin: 0;
-            }
-
-            .username {
-              font-size: 14px;
-              color: #333333;
-            }
-
-            .company, .phone {
-              font-size: 12px;
-              color: #868d9a;
-            }
-          }
-
-          .dropdown-arrow {
-            position: absolute;
-            display: block;
-            top: 0;
-            right: 10px;
-            height: 100%;
-            line-height: 60px;
-          }
-        }
-      }
     }
   }
+}
 
-  .switch-dropdown-list, .user-dropdown-list {
-    width: 180px;
-    padding: 5px 0;
-  }
+.switch-dropdown-list,
+.user-dropdown-list {
+  width: 180px;
+  padding: 5px 0;
+}
 </style>

@@ -16,8 +16,8 @@
           </el-col>
           <el-col :span="7">
             <el-form-item label="担保协议:">
-              <a v-if="detail.guaranteeProtocolUrl" target="_blank" style="color: blue"
-                 :href="detail.guaranteeProtocolUrl">查看</a>
+              <a v-if="detail.guaranteeProtocolUrl" target="_blank" style="color: blue" :href="detail.guaranteeProtocolUrl"
+                download="">下载</a>
             </el-form-item>
           </el-col>
         </el-row>
@@ -59,67 +59,46 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="姓名">
-              <mj-input v-model="detail.partyPersonDTO.realName"
-                        disabled></mj-input>
+              <mj-input v-model="detail.partyPersonDTO.realName" disabled></mj-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="手机号">
-              <mj-input v-model="detail.partyPersonDTO.mobile"
-                        disabled></mj-input>
+              <mj-input v-model="detail.partyPersonDTO.mobile" disabled></mj-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="身份证号">
-              <mj-input v-model="detail.partyPersonDTO.ident"
-                        disabled></mj-input>
+              <mj-input v-model="detail.partyPersonDTO.ident" disabled></mj-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="8">
             <el-form-item label="银行卡所属行">
-              <mj-input v-model="detail.partyPersonDTO.bankName"
-                        disabled></mj-input>
+              <mj-input v-model="detail.partyPersonDTO.bankName" disabled></mj-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="银行卡号">
-              <mj-input v-model="detail.partyPersonDTO.bankCardNo"
-                        disabled></mj-input>
+              <mj-input v-model="detail.partyPersonDTO.bankCardNo" disabled></mj-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="担保次数">
-              <mj-input v-model="detail.num"
-                        disabled></mj-input>
+              <mj-input v-model="detail.num" disabled></mj-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row type="flex" justify="center">
           <el-col :span="8">
-            <mj-upload v-model="idFile1"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="身份证正面照片"
-                       :upload-title="'身份证正面照片'"></mj-upload>
+            <mj-upload v-model="idFile1" :mode="'VIEW'" :limit="1" text="身份证正面照片" :upload-title="'身份证正面照片'"></mj-upload>
           </el-col>
           <el-col :span="8">
-            <mj-upload v-model="idFile2"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="身份证反面照片"
-                       :upload-title="'身份证反面照片'"></mj-upload>
+            <mj-upload v-model="idFile2" :mode="'VIEW'" :limit="1" text="身份证反面照片" :upload-title="'身份证反面照片'"></mj-upload>
           </el-col>
           <el-col :span="8">
-            <mj-upload v-model="idFile3"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="手持身份证照片"
-                       :upload-title="'手持身份证照片'"></mj-upload>
+            <mj-upload v-model="idFile3" :mode="'VIEW'" :limit="1" text="手持身份证照片" :upload-title="'手持身份证照片'"></mj-upload>
           </el-col>
         </el-row>
       </div>
@@ -128,44 +107,19 @@
         <h4><span>补充资料</span></h4>
         <el-row>
           <el-col :span="5">
-            <mj-upload v-model="reportFile1"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="央行征信报告"
-                       :upload-title="'央行征信报告'"></mj-upload>
+            <mj-upload v-model="reportFile1" :mode="'VIEW'" :limit="1" text="央行征信报告" :upload-title="'央行征信报告'"></mj-upload>
           </el-col>
           <el-col :span="5">
-            <mj-upload v-model="reportFile2"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="央行征信报告"
-                       :upload-title="'央行征信报告'"></mj-upload>
+            <mj-upload v-model="reportFile2" :mode="'VIEW'" :limit="1" text="央行征信报告" :upload-title="'央行征信报告'"></mj-upload>
           </el-col>
           <el-col :span="5">
-            <mj-upload v-model="reportFile3"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="央行征信报告"
-                       :upload-title="'央行征信报告'"></mj-upload>
+            <mj-upload v-model="reportFile3" :mode="'VIEW'" :limit="1" text="央行征信报告" :upload-title="'央行征信报告'"></mj-upload>
           </el-col>
           <el-col :span="5">
-            <mj-upload v-model="reportFile4"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="央行征信报告"
-                       :upload-title="'央行征信报告'"></mj-upload>
+            <mj-upload v-model="reportFile4" :mode="'VIEW'" :limit="1" text="央行征信报告" :upload-title="'央行征信报告'"></mj-upload>
           </el-col>
           <el-col :span="4">
-            <mj-upload v-model="reportFile5"
-                       :mode="'VIEW'"
-                       accept="image/*"
-                       :limit="1"
-                       text="央行征信报告"
-                       :upload-title="'央行征信报告'"></mj-upload>
+            <mj-upload v-model="reportFile5" :mode="'VIEW'" :limit="1" text="央行征信报告" :upload-title="'央行征信报告'"></mj-upload>
           </el-col>
         </el-row>
       </div>
@@ -176,27 +130,17 @@
         <el-table-column prop="auditNodeName" label="节点名称"></el-table-column>
         <el-table-column prop="auditPartyName" label="审批人"></el-table-column>
         <el-table-column prop="createdTime" label="审批时间"></el-table-column>
-        <el-table-column prop="auditStatus" label="审批结果"
-                         :formatter="(row, col, val) => ($filter(val, $enum.OPERATION, $enum.WORKFLOW))"></el-table-column>
+        <el-table-column prop="auditStatus" label="审批结果" :formatter="(row, col, val) => ($filter(val, $enum.OPERATION, $enum.WORKFLOW))"></el-table-column>
         <el-table-column prop="description" label="备注"></el-table-column>
       </el-table>
     </el-row>
     <div class="verify-buttons" v-if="mode!='VIEW'">
       <el-row class="margin-top20">
-        <el-button type="success"
-                   size="small" plain
-                   :class="{'is-active': verifyType === 'success'}"
-                   @click="handlePass">通过
+        <el-button type="success" size="small" plain :class="{'is-active': verifyType === 'success'}" @click="handlePass">通过
         </el-button>
-        <el-button size="small"
-                   type="danger" plain
-                   :class="{'is-active': verifyType === 'danger'}"
-                   @click="handleNot">不通过
+        <el-button size="small" type="danger" plain :class="{'is-active': verifyType === 'danger'}" @click="handleNot">不通过
         </el-button>
-        <el-button size="small"
-                   type="info" plain
-                   :class="{'is-active': verifyType === 'info'}"
-                   @click="handleBack">返回修改
+        <el-button size="small" type="info" plain :class="{'is-active': verifyType === 'info'}" @click="handleBack">返回修改
         </el-button>
       </el-row>
       <el-row class="margin-top20">
@@ -225,19 +169,18 @@
         detail: {
           guaranteeAuditDTO: {},
           partyPersonDTO: {
-            identityPicList: []  //身份证照片
+            identityPicList: [] //身份证照片
           }, //担保人基本信息
-          proofMaterialDTOS: [],  //补充资料
-          recordDTOList: []  //审批列表
+          proofMaterialDTOS: [], //补充资料
+          recordDTOList: [] //审批列表
         },
-        recordDTOList: [],  //审批列表
+        recordDTOList: [], //审批列表
         reson: '', //备注
         isShow: false,
         verifyType: 'success',
         isEditing: false,
         list: {},
-        table: [
-          {
+        table: [{
             label: '节点名称',
             prop: 'orgMgrName'
           },
@@ -285,14 +228,16 @@
     computed: {
       idFile1: {
         get() {
-          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.USER_IDENTITY).map(_ => ({
-            name: _.name,
-            url: _.fileUri,
-            type: _.fileType
-          }));
+          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.USER_IDENTITY).map(_ =>
+            ({
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType
+            }));
         },
         set(val) {
-          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !== this.$enum.USER_IDENTITY).concat(val.map(_ => ({
+          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !==
+            this.$enum.USER_IDENTITY).concat(val.map(_ => ({
             name: _.name,
             fileUri: _.url,
             kind: this.$enum.USER_IDENTITY,
@@ -302,14 +247,16 @@
       },
       idFile2: {
         get() {
-          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.USER_IDENTITY_BACK).map(_ => ({
-            name: _.name,
-            url: _.fileUri,
-            type: _.fileType
-          }));
+          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.USER_IDENTITY_BACK).map(
+            _ => ({
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType
+            }));
         },
         set(val) {
-          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !== this.$enum.USER_IDENTITY_BACK).concat(val.map(_ => ({
+          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !==
+            this.$enum.USER_IDENTITY_BACK).concat(val.map(_ => ({
             name: _.name,
             fileUri: _.url,
             kind: this.$enum.USER_IDENTITY_BACK,
@@ -319,14 +266,16 @@
       },
       idFile3: {
         get() {
-          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.HAND_USER_IDENTITY).map(_ => ({
-            name: _.name,
-            url: _.fileUri,
-            type: _.fileType
-          }));
+          return this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind === this.$enum.HAND_USER_IDENTITY).map(
+            _ => ({
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType
+            }));
         },
         set(val) {
-          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !== this.$enum.HAND_USER_IDENTITY).concat(val.map(_ => ({
+          this.detail.partyPersonDTO.identityPicList = this.detail.partyPersonDTO.identityPicList.filter(_ => _.kind !==
+            this.$enum.HAND_USER_IDENTITY).concat(val.map(_ => ({
             name: _.name,
             fileUri: _.url,
             kind: this.$enum.HAND_USER_IDENTITY,
@@ -345,12 +294,13 @@
           }));
         },
         set(val) {
-          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT).concat(val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          })))
+          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT)
+            .concat(val.map(_ => ({
+              name: _.name,
+              fileUri: _.url,
+              kind: this.$enum.BANK_CREDIT_REPORT,
+              fileType: _.type
+            })))
         }
       },
       reportFile2: {
@@ -363,12 +313,13 @@
           }));
         },
         set(val) {
-          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT).concat(val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          })))
+          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT)
+            .concat(val.map(_ => ({
+              name: _.name,
+              fileUri: _.url,
+              kind: this.$enum.BANK_CREDIT_REPORT,
+              fileType: _.type
+            })))
         }
       },
       reportFile3: {
@@ -381,12 +332,13 @@
           }));
         },
         set(val) {
-          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT).concat(val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          })))
+          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT)
+            .concat(val.map(_ => ({
+              name: _.name,
+              fileUri: _.url,
+              kind: this.$enum.BANK_CREDIT_REPORT,
+              fileType: _.type
+            })))
         }
       },
       reportFile4: {
@@ -399,12 +351,13 @@
           }));
         },
         set(val) {
-          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT).concat(val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          })))
+          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT)
+            .concat(val.map(_ => ({
+              name: _.name,
+              fileUri: _.url,
+              kind: this.$enum.BANK_CREDIT_REPORT,
+              fileType: _.type
+            })))
         }
       },
       reportFile5: {
@@ -417,12 +370,13 @@
           }));
         },
         set(val) {
-          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT).concat(val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          })))
+          this.detail.proofMaterialDTOS = this.detail.proofMaterialDTOS.filter(_ => _.kind !== this.$enum.BANK_CREDIT_REPORT)
+            .concat(val.map(_ => ({
+              name: _.name,
+              fileUri: _.url,
+              kind: this.$enum.BANK_CREDIT_REPORT,
+              fileType: _.type
+            })))
         }
       },
     },
@@ -536,6 +490,7 @@
       }
     }
   }
+
 </script>
 
 <style lang="scss" scoped>

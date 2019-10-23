@@ -8,6 +8,9 @@
       <el-tab-pane label="存管账户" name="second" style="overflow: scroll">
         <account v-model="depositAccount" :activeName="'second'" @search="handleDestSearch" @download="handleDestDownload"></account>
       </el-tab-pane>
+      <el-tab-pane label="律信账户" name="third" style="overflow: scroll">
+        <account v-model="lxAccount" :activeName="'third'" @search="handleLxSearch" @download="handleLxDownload"></account>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -15,11 +18,15 @@
 <script>
   import Account from './components/flowAccount.vue'
   import {
+    downFundList,
+    downDestList,
+    downLxList,
     getFundList,
     getDepositList,
-    downFundList,
-    downDestList
   } from '../../api/finance'
+  import {
+    getLxList
+  } from  '../../api/user'
 
   export default {
     name: 'RepaymentCapitalflow',
@@ -31,6 +38,7 @@
         activeName: 'first',
         fundAccount: {},
         depositAccount: {},
+        lxAccount:{},
         fundSearch: {
           transTimeB: '',
           transTimeE: '',
@@ -38,7 +46,7 @@
           successTimeE: '',
           holder: "",
           flowId: "",
-          feeType: "",
+          feeType: [],
           pageSize: 10,
           pageNumber: 1
         },
@@ -53,24 +61,40 @@
           pageSize: 10,
           pageNumber: 1
         },
+        lxSearch: {
+          transTimeB: '',
+          transTimeE: '',
+          successTimeB: '',
+          successTimeE: '',
+          holder: "",
+          flowId: "",
+          feeType: "",
+          pageSize: 10,
+          pageNumber: 1
+        },
       }
     },
     created() {
-      this.getFundList();
-      this.getDepositList();
+      this.getFundList(this.fundSearch.pageSize,this.fundSearch.pageNumber);
+      this.getDepositList(this.depositSearch.pageSize,this.depositSearch.pageNumber);
+      this.getLxList(this.lxSearch.pageSize,this.lxSearch.pageNumber);
     },
     methods: {
       handleFundSearch(val) {
         this.fundSearch = val;
-        this.getFundList();
+        this.getFundList(this.fundSearch.pageSize,this.fundSearch.pageNumber);
       },
       handleDestSearch(val) {
         this.depositSearch = val;
-        this.getDepositList();
+        this.getDepositList(this.depositSearch.pageSize,this.depositSearch.pageNumber);
+      },
+      handleLxSearch(val) {
+        this.lxSearch = val;
+        this.getLxList(this.lxSearch.pageSize,this.lxSearch.pageNumber);
       },
       handleClick(val){
         val.$children[0].search.flowId = "";
-        val.$children[0].search.feeType = "";
+        val.$children[0].search.feeType = this.activeName=='first'?[]:'';
         val.$children[0].search.successTimeE = "";
         val.$children[0].search.successTimeB = "";
         val.$children[0].search.holder = "";
@@ -78,10 +102,21 @@
         val.$children[0].search.transTimeE = "";
         val.$children[0].search.pageSize = 10;
         val.$children[0].search.pageNumber = 1;
+        if(this.activeName =='first'){
+          this.getFundList(this.fundSearch.pageSize,this.fundSearch.pageNumber);
+        }else if(this.activeName == 'second'){
+          this.getDepositList(this.depositSearch.pageSize,this.depositSearch.pageNumber);
+        }else if(this.activeName == 'third'){
+          this.getLxList(this.lxSearch.pageSize,this.lxSearch.pageNumber);
+        }
       },
       //资金账户
-      getFundList() {
-        getFundList(this.fundSearch).then(response => {
+      getFundList(pageSize,pageNum) {
+        const search = this.$deepcopy(this.fundSearch);
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        search.feeType = search.feeType.join(',');
+        getFundList(search).then(response => {
           const res = response.data;
           if (res.code === 200) {
             this.fundAccount = res.body;
@@ -89,27 +124,43 @@
         })
       },
       //存管
-      getDepositList() {
-        getDepositList(this.depositSearch).then(response => {
+      getDepositList(pageSize,pageNum) {
+        const search = this.$deepcopy(this.depositSearch);
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        getDepositList(search).then(response => {
           const res = response.data;
           if (res.code === 200) {
             this.depositAccount = res.body;
           }
         })
       },
-      // 下载文件
-      // handleFundDownload(){
-      //   downFundList(this.fundSearch).then((res) => {
-      //     if (res.status === 200) {
-      //       let data = res.data;
-      //       let filename = res.headers["content-disposition"] ? res.headers["content-disposition"].split(
-      //         "filename=")[1] : "funds_list.xlsx";
-      //       this.$downloadExcel(data, filename);
-      //     }
-      //   })
-      // },
+      //律信
+      getLxList(pageSize,pageNum) {
+        const search = this.$deepcopy(this.lxSearch);
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        getLxList(search).then(response => {
+          const res = response.data;
+          if (res.code === 200) {
+            this.lxAccount = res.body;
+          }
+        })
+      },
+      //存管下载
       handleDestDownload(){
         downDestList(this.depositSearch).then((res) => {
+          if (res.status === 200) {
+            let data = res.data;
+            let filename = res.headers["content-disposition"] ? res.headers["content-disposition"].split(
+              "filename=")[1] : "dest_list.xlsx";
+            this.$downloadExcel(data, filename);
+          }
+        })
+      },
+      //律信下载
+      handleLxDownload(){
+        downLxList(this.lxSearch).then((res) => {
           if (res.status === 200) {
             let data = res.data;
             let filename = res.headers["content-disposition"] ? res.headers["content-disposition"].split(

@@ -19,28 +19,28 @@
             </mj-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="6">
           <el-form-item label="开户类型">
             <mj-select v-model="search.accountType" :kind="this.$enum.ACCOUNT_TYPE" :group="this.$enum.ACCOUNT_TYPE" clearable>
             </mj-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="6">
           <el-form-item label="资金中心开户状态">
-            <mj-select v-model="search.fundStatus" :kind="this.$enum.OPEN_STATUS" :group="this.$enum.OPEN_STATUS" clearable>
+            <mj-select v-model="search.fundStatus" :kind="this.$enum.OPEN_STATUS" :group="this.$enum.OPEN_STATUS"
+                       :sequence=[0,1]
+                       clearable>
             </mj-select>
           </el-form-item>
         </el-col>
-        <el-col :span="6">
-          <el-form-item label="金融存管开户状态">
+        <el-col :span="7">
+          <el-form-item label="金融西安存管开户状态">
             <mj-select v-model="search.depositStatus" :kind="this.$enum.OPEN_STATUS" :group="this.$enum.OPEN_STATUS" clearable>
             </mj-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="开户申请时间">
             <el-date-picker v-model="appDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期" end-placeholder="结束日期">
@@ -69,7 +69,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 </template>
@@ -102,7 +108,8 @@
         },
         pageTotal: 0,
         list: [],
-        table: [{
+        table: [
+          {
             label: '登录手机号码',
             prop: 'mobile'
           },
@@ -137,7 +144,7 @@
             formatter: (row, col, val) => val == null ? "未开户" : this.$filter(val, this.$enum.OPEN_STATUS, this.$enum.OPEN_STATUS)
           },
           {
-            label: '金融存管开户状态',
+            label: '金融西安存管开户状态',
             prop: 'depositStatus',
             formatter: (row, col, val) => val == null ? "未开户" : this.$filter(val, this.$enum.OPEN_STATUS, this.$enum.OPEN_STATUS)
           },
@@ -145,6 +152,10 @@
             label: '开户申请时间',
             prop: 'openTime',
             formatter: (row, col, val) => val ? val : "--"
+          },
+          {
+            label: '存管开户失败原因',
+            prop: 'failMsg'
           }
         ],
       }
@@ -173,18 +184,27 @@
       }
     },
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
-      handleSearch() {
-        this.getData(1);
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      getData(index) {
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
+      },
+      getData(pageSize,pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        search.pageNumber = index;
-        getUserList(search).then(({
-          data
-        }) => {
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        getUserList(search).then(({data}) => {
           if (data.code === 200) {
             this.list = data.body.list;
             this.pageTotal = data.body.totalRecord;

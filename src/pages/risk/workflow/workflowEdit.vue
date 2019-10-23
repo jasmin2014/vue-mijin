@@ -41,7 +41,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getWorkflowDetail"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
     <!--增加用户-->
@@ -87,7 +93,8 @@
         addAccount: {
           // nodeId:this.$route.params.id
         },
-        table: [{
+        table: [
+          {
             label: '登录账号',
             prop: 'mobile'
           },
@@ -113,7 +120,7 @@
               trigger: 'blur'
             },
             {
-              pattern: this.$valid.mobile,
+              pattern: this.$valid.mobile11,
               message: '请输入正确的手机号码',
               trigger: 'blur'
             }
@@ -124,11 +131,21 @@
     created() {
       this.id = this.$route.params.id;
       this.type = this.$route.query.type;
-      this.getWorkflowDetail(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
+      },
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
       handleSearch() {
-        this.getWorkflowDetail(1);
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleAdd() {
         this.dialog = true;
@@ -160,15 +177,16 @@
                 type: "success"
               });
               setTimeout(() => {
-                this.getWorkflowDetail(this.search.pageNumber);
+                this.getData(this.search.pageSize,this.search.pageNumber)
               }, 1000)
             }
           })
         })
       },
-      getWorkflowDetail(index) {
+      getData(pageSize,pageNum) {
         const search = this.$deepcopy(this.search);
-        search.pageNumber = index;
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
         getWorkflowDetail(this.id, search).then(response => {
           const res = response.data;
           if (res.code === 200) {
@@ -190,7 +208,7 @@
             });
             this.dialog = false;
             setTimeout(() => {
-              this.getWorkflowDetail(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })

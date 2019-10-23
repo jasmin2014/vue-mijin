@@ -38,7 +38,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getWorkflowDetail"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
   </div>
@@ -62,7 +68,8 @@
           pageSize: 10,
           pageNumber: 1
         },
-        table: [{
+        table: [
+          {
             label: '登录账号',
             prop: 'mobile'
           },
@@ -86,15 +93,26 @@
     created() {
       this.nodeId = this.$route.params.id;
       this.type = this.$route.query.type;
-      this.getWorkflowDetail(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
-      handleSearch() {
-        this.getWorkflowDetail(1);
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      getWorkflowDetail(index) {
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
+      },
+      getData(pageSize,pageNum) {
         const search = this.$deepcopy(this.search);
-        search.pageNumber = index;
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
         getWorkflowDetail(this.nodeId, search).then(response => {
           const res = response.data;
           if (res.code === 200) {

@@ -27,12 +27,14 @@
         </el-col>
         <el-col :span="6">
           <el-form-item label="审核节点">
+            <mj-select v-model="search.productType" :kind="this.$enum.LOAN_KIND" :group="this.$enum.PRODUCT" @change="handleTypeChange"
+              clearable></mj-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item>
             <el-select v-model="search.nodeId" placeholder="请选择" clearable>
-              <el-option
-                v-for="item in nodes"
-                :key="item.nodeId"
-                :label="item.nodeName"
-                :value="item.nodeId">
+              <el-option v-for="item in nodes" :key="item.nodeId" :label="item.nodeName" :value="item.nodeId">
               </el-option>
             </el-select>
           </el-form-item>
@@ -41,66 +43,76 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="申请时间">
-            <el-date-picker
-              v-model="applyDate"
-              value-format="yyyy-MM-dd"
-              type="daterange"
-              start-placeholder="开始日期"
+            <el-date-picker v-model="applyDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期"
               end-placeholder="结束日期" clearable>
             </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :span="1">
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" title="查找"
-                       @click="handleSearch"></el-button>
+            <el-button type="primary" icon="el-icon-search" title="查找" @click="handleSearch"></el-button>
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
     <el-row>
       <el-table :data="list" border>
-        <el-table-column v-for="(col, index) in table"
-                         :label="col.label"
-                         :prop="col.prop"
-                         :formatter="col.formatter"
-                         :key="index"
-                         align="center"></el-table-column>
-        <el-table-column label="操作" align="center" width="180">
+        <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter"
+          :key="index" align="center"></el-table-column>
+        <el-table-column label="操作" align="center" width="300">
           <template slot-scope="scope">
             <el-tooltip content="查看">
-              <el-button size="small" icon="el-icon-view"
-                         @click="handleDetail(scope.row)"></el-button>
+              <el-button size="small" icon="el-icon-view" @click="handleDetail(scope.row)"></el-button>
             </el-tooltip>
-            <!--<el-tooltip content="借款一审">-->
-            <el-button v-if="scope.row.nodeName" size="small" type="info"
-                       @click="handleEdit(scope.row)">{{scope.row.nodeName}}
+            <el-button v-if="scope.row.nodeName && scope.row.auditPartyId" size="small" type="info" @click="handleEdit(scope.row)">{{scope.row.nodeName}}
             </el-button>
-            <!--</el-tooltip>-->
+            <el-tooltip v-if="scope.row.auditPartyId" content="退签">
+              <el-button size="small" type="info" @click="handleFire(scope.row)">退签
+              </el-button>
+            </el-tooltip>
+            <el-tooltip v-else content="签收">
+              <el-button size="small" type="info" @click="handleSign(scope.row)">签收
+              </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
-                     @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 </template>
 
 <script>
-  import {getLoanAgencyList} from '../../../api/risk'
+  import {
+    getLoanAgencyList,
+    getLoanAllAgencyList,
+    loanSign,
+    loanFire,
+    getLoanList
+  } from '../../../api/risk'
 
   export default {
     name: "loan-audit",
     components: {},
-    props: {nodeList: Array},
+    props: {
+      type: String
+    },
     data() {
       return {
         nodes: [],
         search: {
           startAppDate: '',
           endAppDate: '',
+          productType: '',
+          nodeId: '',
           pageSize: 10,
           pageNumber: 1
         },
@@ -139,10 +151,6 @@
           {
             label: '审核节点',
             prop: 'nodeName'
-          },
-          {
-            label: '当前操作人',
-            prop: 'operatorName'
           }
         ]
       }
@@ -170,57 +178,161 @@
         }
       }
     },
-    watch: {
-      'nodeList'(val) {
-        this.nodes = val;
-      }
-    },
+    watch: {},
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
-      updateData(){
-        setTimeout(()=>{
-          this.getData(this.search.pageNumber);
-        },1000)
+      handleTypeChange(val) {
+        if (val) {
+          this.getLoanList(val);
+        } else {
+          this.nodes = [];
+          this.search.nodeId = "";
+        }
       },
-      handleSearch() {
-        this.getData(1);
-      },
-      getData(index) {
-        const search = this.$deepcopy(this.search);
-        search.pageNumber = index;
-        getLoanAgencyList(search).then(({data}) => {
-          if (data.code === 200) {
-            this.list = data.body.list;
-            this.pageTotal = data.body.totalRecord;
+      // handleNodeChange(val) {
+      //   if (!val) {
+      //     this.nodes = [];
+      //     this.search.productType = "";
+      //     this.search.nodeId = "";
+      //   }
+      // },
+      getLoanList(val) {
+        getLoanList({
+          productType: val
+        }).then(response => {
+          const res = response.data;
+          if (res.code === 200) {
+            this.nodes = res.body;
+            // this.search.nodeId = this.nodes[0].nodeId;
           }
         })
       },
+      updateData() {
+        setTimeout(() => {
+          this.getData(this.search.pageSize,this.search.pageNumber)
+        }, 1000)
+      },
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
+      },
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
+      },
+      getData(pageSize,pageNum) {
+        const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        if (this.type === "my") {
+          getLoanAgencyList(search).then(({
+            data
+          }) => {
+            if (data.code === 200) {
+              this.list = data.body.list;
+              this.pageTotal = data.body.totalRecord;
+            }
+          })
+        } else if (this.type === "all") {
+          getLoanAllAgencyList(search).then(({
+            data
+          }) => {
+            if (data.code === 200) {
+              this.list = data.body.list;
+              this.pageTotal = data.body.totalRecord;
+            }
+          })
+        }
+      },
       handleDetail(row) {
-        this.$router.push({
-          'name': 'RiskLoanDetail',
-          params: {id: row.applicationId},
+        const { href } = this.$router.resolve({
+          name: "RiskLoanDetail",
+          params: {
+            id: row.applicationId
+          },
           query: {
-            type: 'VIEW',
-            id: row.productId
+            type: "VIEW",
+            id: row.productId,
+            creditId: row.creditId
+          }
+        });
+        window.open(href, "_blank");
+      },
+      // 退签
+      handleFire(row) {
+        this.$confirm("确定要退签吗?", '提示', {
+          type: 'warning'
+        }).then(() => {
+          this.fire(row.applicationId);
+        })
+      },
+      // 签收
+      handleSign(row) {
+        this.$confirm("确定签收吗?", '提示', {
+          type: 'warning'
+        }).then(() => {
+          this.sign(row.applicationId);
+        })
+      },
+      //签收
+      sign(id) {
+        loanSign(id).then(response => {
+          const res = response.data;
+          if (res.code === 200) {
+            this.$message({
+              type: 'success',
+              message: "签收成功"
+            })
+            setTimeout(() => {
+              this.getData(this.search.pageSize,this.search.pageNumber)
+            }, 1000)
+            this.$emit('sign');
+          }
+        })
+      },
+      //退签
+      fire(id) {
+        loanFire(id).then(response => {
+          const res = response.data;
+          if (res.code === 200) {
+            this.$message({
+              type: 'success',
+              message: "退签成功"
+            })
+            setTimeout(() => {
+              this.getData(this.search.pageSize,this.search.pageNumber)
+            }, 1000)
+            this.$emit('sign');
           }
         })
       },
       handleEdit(row) {
         this.$router.push({
           'name': 'RiskLoanDetail',
-          params: {id: row.applicationId},
+          params: {
+            id: row.applicationId
+          },
           query: {
             type: 'EDIT',
-            id: row.productId
+            id: row.productId,
+            creditId: row.creditId,
+            nodeName: row.nodeName
           }
         })
       }
     }
   }
+
 </script>
 
 <style scoped>
+
 
 </style>

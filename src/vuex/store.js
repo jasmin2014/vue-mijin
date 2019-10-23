@@ -1,5 +1,5 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import Vue from "vue";
+import Vuex from "vuex";
 
 Vue.use(Vuex);
 
@@ -7,10 +7,11 @@ export default new Vuex.Store({
   state: {
     routes: {},
     regions: {},
-    enums:{},
-    qiniu: '',
+    enums: {},
+    qiniu: "",
+    publicKey:'',
     params: {
-      accountType: ''
+      accountType: ""
     }
   },
   mutations: {
@@ -24,8 +25,8 @@ export default new Vuex.Store({
     saveRegions(state, region) {
       state.regions[region.code] = region.list;
     },
-    saveSysEnums(state, enums){
-      if (enums){
+    saveSysEnums(state, enums) {
+      if (enums) {
         state.enums = enums;
       }
     },
@@ -35,18 +36,21 @@ export default new Vuex.Store({
     saveParams(state, {key, val}) {
       state.params[key] = val;
     },
+    savePubKey(state, key) {
+      state.publicKey = key;
+    },
     clearParams(state) {
       state.params = {
-        accountType: ''
+        accountType: ""
       };
     }
   },
   actions: {
     saveRoute(ctx, routes) {
-      ctx.commit('saveRoute', routes);
+      ctx.commit("saveRoute", routes);
     },
     saveParams(ctx, {key, val}) {
-      ctx.commit('saveParams', {key, val})
+      ctx.commit("saveParams", {key, val});
     }
   }
-})
+});

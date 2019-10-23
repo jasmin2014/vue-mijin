@@ -63,19 +63,24 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
-                     @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
     <!--弹框-->
     <el-dialog :title="productTitle" :visible.sync="isShow"
                @open="handleDialogOpen"
                @close="handleDialogClose">
-      <el-form :model="product" ref="product" label-width="130px" :rules="rules">
+      <el-form :model="product" ref="product" label-width="130px" :rules="mode!=='VIEW' ? rules : {}">
         <el-row>
           <el-col :span="20">
             <el-form-item label="产品名称" prop="productName">
-              <mj-input v-model="product.productName"
+              <mj-input v-model.trim="product.productName"
                         :mode="mode"></mj-input>
             </el-form-item>
           </el-col>
@@ -83,7 +88,7 @@
         <el-row>
           <el-col :span="20">
             <el-form-item label="产品编号" prop="productId">
-              <mj-input v-model="product.productId"
+              <mj-input v-model.trim="product.productId"
                         :disabled="mode!=='CREATE'"></mj-input>
               <span class="product-tip">编号规则:渠道缩写+产品缩写+四位数字,例:MJDSD0001</span>
             </el-form-item>
@@ -95,7 +100,7 @@
               <mj-select v-model="product.productType"
                          :kind="this.$enum.LOAN_KIND"
                          :group="this.$enum.PRODUCT"
-                         :mode="mode"
+                         :disabled="mode==='VIEW' || mode==='EDIT'"
                          clearable></mj-select>
             </el-form-item>
           </el-col>
@@ -107,7 +112,6 @@
                 <el-checkbox v-for="item in productStrategyList"
                              :label="item.strategyId"
                              :key="item.strategyId"
-                             @change="changeTest(product.strategyIdList)"
                              :disabled="mode==='VIEW'">{{item.strategyName}}
                 </el-checkbox>
               </el-checkbox-group>
@@ -115,15 +119,22 @@
           </el-col>
         </el-row>
         <el-row>
+          <el-col :span="20">
+            <el-form-item label="关联风控策略" prop="riskStrategy">
+              <mj-input v-model.trim="product.riskStrategy" :mode="mode"></mj-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
           <el-col :span="20" class="credit-flex" style="display: flex; justify-content: space-between;">
             <el-form-item label="授信额度(万元)" prop="creditMinAmount">
               <mj-input v-model="product.creditMinAmount"
-                        :mode="mode" type="number" style="width: 100%;"></mj-input>
+                        :mode="mode" style="width: 100%;"></mj-input>
             </el-form-item>
             <span style="height: 40px;line-height: 40px;">-</span>
             <el-form-item label-width="0" prop="creditMaxAmount">
               <mj-input v-model="product.creditMaxAmount"
-                        :mode="mode" type="number" style="width: 100%;"></mj-input>
+                        :mode="mode" style="width: 100%;"></mj-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -131,7 +142,7 @@
           <el-col :span="20">
             <el-form-item label="授信额度有效期" prop="creditExpireDate">
               <mj-input v-model="product.creditExpireDate"
-                        :mode="mode" type="number" unit="天">
+                        :mode="mode" unit="天">
               </mj-input>
             </el-form-item>
           </el-col>
@@ -162,6 +173,7 @@
     components: {},
     data() {
       const dateInt = (rule, value, callback) => {
+        value = Number(value);
         if (!Number.isInteger(value)) {
           callback('请输入整数');
         } else {
@@ -173,6 +185,7 @@
         }
       };
       const minAmountInt = (rule, value, callback) => {
+        value = Number(value);
         if (!Number.isInteger(value)) {
           callback('请输入整数');
         } else {
@@ -186,6 +199,7 @@
         }
       };
       const maxAmountInt = (rule, value, callback) => {
+        value = Number(value);
         if (!Number.isInteger(value)) {
           callback('请输入整数');
         } else {
@@ -215,7 +229,8 @@
           strategyIdList: [],
           creditMinAmount: "",
           creditMaxAmount: "",
-          creditExpireDate: ""
+          creditExpireDate: "",
+          riskStrategy: ''
         },
         isShow: false,
         pageTotal: 0,
@@ -256,6 +271,14 @@
           strategyIdList: [
             {required: true, message: '至少选择一种放款模式!', trigger: 'change', type: 'array'}
           ],
+          riskStrategy: [
+            {
+              min: 1,
+              max: 20,
+              message: "请输入20字以内",
+              trigger: "blur"
+            }
+          ],
           creditMinAmount: [
             {required: true, message: '请输入授信额度!', trigger: 'blur'},
             {validator: minAmountInt, trigger: 'blur'}
@@ -272,15 +295,22 @@
       }
     },
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
       this.productStrategy();
     },
     methods: {
-      handleSearch() {
-        this.getData(1);
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      changeTest(val) {
-        // console.log('23213', val);
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleSave() {
         this.$refs['product'].validate((val) => {
@@ -311,9 +341,6 @@
       },
       handleDialogClose() {
         this.isShow = false;
-        // this.product = {
-        //   strategyIdList: []
-        // }
         this.$refs['product'].resetFields();
       },
       handleCancel() {
@@ -344,9 +371,10 @@
         this.mode = 'EDIT';
       },
 
-      getData(index) {
+      getData(pageSize,pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        search.pageNumber = index;
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
         getProductList(search).then(response => {
           const res = response.data;
           if (res.code === 200) {
@@ -367,12 +395,9 @@
               type: 'success',
               message: '添加成功'
             });
-            // this.product = {
-            //   strategyIdList: []
-            // };
             this.isShow = false;
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })
@@ -388,7 +413,7 @@
               message: '添加成功'
             });
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })
@@ -403,7 +428,7 @@
               message: '添加成功'
             });
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })
@@ -429,6 +454,7 @@
             this.product.creditMaxAmount = res.body.creditMaxAmount / 10000;
             this.product.creditExpireDate = res.body.creditExpireDate;
             this.product.strategyIdList = res.body.strategyIdList || [];
+            this.product.riskStrategy = res.body.riskStrategy;
           }
         })
       },
@@ -446,7 +472,7 @@
             });
             this.isShow = false;
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })

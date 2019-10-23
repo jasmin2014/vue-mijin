@@ -74,7 +74,8 @@
   const SEND_CODE_FAILED = 'SEND_CODE_FAILED';
   const USAGE_ACTIVATE = 'REGISTER'; //识别注册验证码
   const USAGE_RESET = 'RESET_PASSWORD'; //识别重置密码
-  const phoneRegexp = /^1[34578]\d{9}$/;
+  // const phoneRegexp = /^1[3456789]\d{9}$/;
+  const phoneRegexp = /^((17[0-9])|(14[0-9])|(13[0-9])|(15[^4,\D])|(18[0-9])|(166)|(199)|(198))\d{8}$/;
   export default {
     components: {
       TopHeader
@@ -206,9 +207,8 @@
       },
       //激活
       doActivate(phone, phoneCode, password) {
-        doActivate(phone, phoneCode, password).then(({
-          data
-        }) => {
+        let psd = this.$psdEncrypt(password);
+        doActivate(phone, phoneCode, psd).then(({data}) => {
           if (data.code == 200) {
             this.$message({
               message: '注册成功,请登陆!',
@@ -246,7 +246,8 @@
       },
       //重置密码
       doResetPassword(phone, phoneCode, password) {
-        doResetPassword(phone, phoneCode, password).then(({
+        let psd = this.$psdEncrypt(password);
+        doResetPassword(phone, phoneCode, psd).then(({
           data
         }) => {
           if (data.code == 200) {

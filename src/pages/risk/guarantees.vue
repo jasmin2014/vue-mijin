@@ -14,8 +14,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="借款人姓名">
-            <el-input v-model="search.partyName" placeholder="借款人姓名" clearable></el-input>
+          <el-form-item label="担保编号">
+            <el-input v-model="search.applicationId" placeholder="担保编号" clearable></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -26,8 +26,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="担保编号">
-            <el-input v-model="search.applicationId" placeholder="担保编号" clearable></el-input>
+          <el-form-item label="借款人姓名">
+            <el-input v-model="search.partyName" placeholder="借款人姓名" clearable></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -89,8 +89,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
-                     @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 </template>
@@ -173,15 +178,26 @@
       }
     },
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
-      handleSearch() {
-        this.getData(1);
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      getData(index) {
-        const search = this.$deepcopy(this.search);
-        search.pageNumber = index;
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
+      },
+      getData(pageSize,pageNum) {
+        const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
         getGuaranteeList(search).then(response => {
           const res = response.data;
           if (res.code === 200) {
@@ -221,7 +237,7 @@
               message: '操作成功'
             });
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })

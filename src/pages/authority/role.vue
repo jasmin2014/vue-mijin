@@ -39,7 +39,7 @@
         </el-table>
       </el-row>
       <el-row type="flex" justify="center" class="mgt20">
-        <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
+        <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" :current-page="search.pageNumber"
                        @current-change="getData"></el-pagination>
       </el-row>
     </el-form>

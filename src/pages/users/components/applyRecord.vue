@@ -24,6 +24,11 @@
     </el-form>
     <el-row>
       <el-table :data="list" class="table-center" border>
+        <el-table-column label="授信申请编号" prop="applicationId" align="center" width="180px">
+          <template slot-scope="scope">
+            <el-button type="text" @click="goToCreditDecs(scope.row)">{{scope.row.applicationId}}</el-button>
+          </template>
+        </el-table-column>
         <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter" :key="index"
           align="center"></el-table-column>
         <el-table-column label="操作" width="150" align="center">
@@ -35,7 +40,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
     <!--弹框-->
     <el-dialog title="担保信息" :visible.sync="guaranteeVisible">
@@ -118,10 +129,7 @@
         pageTotal: 0,
         list: [],
         guarantDetail: {},
-        table: [{
-            label: '授信申请编号',
-            prop: 'applicationId'
-          },
+        table: [
           {
             label: '产品名称',
             prop: 'productName'
@@ -178,11 +186,21 @@
     },
     created() {
       this.search.partyId = this.$route.params.id;
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
+      },
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
       handleSearch() {
-        this.getData(1);
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleCancel(){
         this.guaranteeVisible = false;
@@ -197,12 +215,24 @@
         window.open(this.guarantDetail.guaranteeProtocolUrl);
         // location.href = this.guarantDetail.guaranteeProtocolUrl;
       },
-      getData(index) {
-        this.search.pageNumber = index;
+      goToCreditDecs(row){
+        const { href } = this.$router.resolve({
+          name: "RiskCreditDetail",
+          params: {
+            id: row.applicationId
+          },
+          query: {
+            type: "VIEW",
+            id: row.productId
+          }
+        });
+        window.open(href, "_blank");
+      },
+      getData(pageSize,pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        creditList(search).then(({
-          data
-        }) => {
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        creditList(search).then(({data}) => {
           if (data.code === 200) {
             this.list = data.body.list;
             this.pageTotal = data.body.totalRecord;

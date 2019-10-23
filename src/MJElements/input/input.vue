@@ -1,7 +1,7 @@
 <template>
-  <el-input v-model="currentValue" ref="input" :class="readonly ? 'is-readonly' : ''" :readonly="readonly" :disabled="disabled"
-    :size="size" :type="type" :rows="rows" :min="min" :max="max" :step="step" :placeholder="placeholder" :debounce="0" @input="handleInput"
-    @focus="handleFocus" @change="handleChange" @blur="handleBlur">
+  <el-input v-model="currentValue" ref="input" :class="readonly ? 'is-readonly' : ''" :readonly="readonly" :disabled="disabled" :cprop="cprop" :index="index" :outdex="outdex"
+    :size="size" :type="type" :error="error" :rows="rows" :min="min" :max="max" :step="step" :placeholder="placeholder" :debounce="0"
+    @input="handleInput" @focus="handleFocus" @change="handleChange" @blur="handleBlur">
     <template v-if="unit" slot="append">{{ unit }}</template>
   </el-input>
 </template>
@@ -14,10 +14,14 @@
       mode: String,
       unit: String,
       type: String,
+      error: String,
       size: String,
       rows: Number,
       disabled: Boolean,
       min: Number,
+      cprop: String,
+      index: Number,
+      outdex: Number,
       max: {
         type: Number,
         default: Number.MAX_SAFE_INTEGER
@@ -82,15 +86,27 @@
       },
       handleBlur(event) {
         if (this.type === 'number') {
-          const newValue = parseFloat(this.currentValue);
-          if (!isNaN(newValue)) {
-            this.currentValue = newValue;
-          } else if (this.currentValue !== '' && this.currentValue !== undefined && this.currentValue !== null) {
-            this.currentValue = 0;
+          if (this.currentValue) {
+            if (this.error) {
+              if (/^([1-9][0-9]*(\.[0-9]{1,2})?|0\.[1-9][0-9]{0,1}|0\.[0-9][1-9])$/.test(this.currentValue)) {
+                this.$emit('check', this.currentValue, true);
+              } else {
+                this.currentValue = undefined;
+                this.$emit('check', this.error, false);
+              }
+            } else {
+              const newValue = parseFloat(this.currentValue);
+              if (!isNaN(newValue)) {
+                this.currentValue = newValue;
+              } else if (this.currentValue !== '' && this.currentValue !== undefined && this.currentValue !== null) {
+                this.currentValue = 0;
+              }
+              this.$emit('input', this.currentValue)
+            }
           }
-          this.$emit('input', this.currentValue)
+        } else {
+          this.$emit('blur', event, this.currentValue);
         }
-        this.$emit('blur', event , this.currentValue);
       }
     }
   }

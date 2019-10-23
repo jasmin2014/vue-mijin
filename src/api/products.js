@@ -64,3 +64,7 @@ export const disableStrategy = (strategyId) => {
 export const editStrategy = (params) => {
   return http.admin.put('v1/product/product-strategy/update',params)
 };
+//删除
+export const delStrategy = (strategyId,repayTerms) => {
+  return http.admin.delete(`/v1/product/product-strategy/_del/${strategyId}/${repayTerms}`)
+};

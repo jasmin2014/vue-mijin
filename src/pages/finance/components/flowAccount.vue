@@ -39,9 +39,17 @@
         </el-col>
         <el-col :span="6">
           <el-form-item label="交易类型">
-            <mj-select v-model="search.feeType"
+            <mj-select v-if="activeName=='first'" v-model="search.feeType"
+                       multiple
                        :kind="this.$enum.FEE_TYPE"
-                       :group="this.$enum.FEE_TYPE" :sequence=[0,1,2,3,4,5,6,7,8,9,10,11,12,15,16,17,18] clearable></mj-select>
+                       :group="this.$enum.FEE_TYPE"
+                       :sequence=[1,2,3,4,5,6,7,8,9,10,11,12,15,16,17,18,19,20,21,22,23,27,28]
+                       clearable></mj-select>
+            <mj-select v-else v-model="search.feeType"
+                       :kind="this.$enum.FEE_TYPE"
+                       :group="this.$enum.FEE_TYPE"
+                       :sequence=[1,2,3,4,5,6,7,8,9,10,11,12,15,16,17,18,19,20,21,22,23,27,28]
+                       clearable></mj-select>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -52,13 +60,10 @@
         <el-col :span="6">
           <el-form-item>
             <el-button type="primary" icon="el-icon-search" title="查找" @click="handleSearch"></el-button>
-            <el-button v-if="activeName=='second'"  type="primary" icon="el-icon-download" title="下载" @click="handleDownload"></el-button>
+            <el-button v-if="activeName !='first'" type="primary" icon="el-icon-download" title="下载"
+                       @click="handleDownload"></el-button>
           </el-form-item>
         </el-col>
-        
-      </el-row>
-      <el-row>
-
       </el-row>
     </el-form>
     <el-row>
@@ -72,8 +77,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
-                     @current-change="handleChange"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 </template>
@@ -82,7 +92,7 @@
   export default {
     props: {
       type: String,
-      value: Object,
+      value: [Object, Array],
       activeName: String
     },
     components: {},
@@ -91,14 +101,14 @@
         search: {
           transTimeB: '',
           transTimeE: '',
-          successTimeB:'',
-          successTimeE:'',
-          holder:"",
-          flowId:"",
-          feeType:"",
+          successTimeB: '',
+          successTimeE: '',
+          holder: "",
+          flowId: "",
+          feeType: this.activeName == 'first' ? [] : '',
           pageSize: 10,
           pageNumber: 1,
-          loginName:''
+          loginName: ''
         },
         pageTotal: 0,
         currentValue: {},
@@ -150,8 +160,8 @@
       }
     },
     watch: {
-      'value'(val){
-        if(val){
+      'value'(val) {
+        if (val) {
           this.currentValue = val;
           this.pageTotal = val.totalRecord;
         }
@@ -179,7 +189,7 @@
           }
         }
       },
-      successDate:{
+      successDate: {
         get() {
           if (this.search.successTimeB || this.search.successTimeE) {
             let dateRange = [];
@@ -203,11 +213,16 @@
     },
     methods: {
       handleSearch() {
-        this.$emit('search',this.search);
+        this.search.pageNumber = 1;
+        this.$emit('search', this.search);
       },
-      handleChange(val) {
-        this.search.pageNumber = val;
-        this.$emit('search',this.search);
+      handleCurrentChange(val) {
+        this.search.pageNumber = val
+        this.$emit('search', this.search);
+      },
+      handleSizeChange(val) {
+        this.search.pageSize = val
+        this.$emit('search', this.search);
       },
       handleDownload() {
         this.$emit('download');

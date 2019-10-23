@@ -7,11 +7,13 @@
 <script>
   import {getAllSysEnum} from './api/enum';
   import {getQiniuToken} from './api/common';
-export default {
+  import {getLoginPublicKey} from './api/login';
+  export default {
   name: 'App',
   created(){
     this.getQiniuToken();
     this.getSysEnums();
+    this.getLoginPublicKey();
   },
   methods: {
     getQiniuToken(){
@@ -37,6 +39,15 @@ export default {
           this.$store.commit('saveSysEnums', enums);
         }
       }, () => {})
+    },
+    //获取密钥
+    getLoginPublicKey(){
+      getLoginPublicKey().then(response => {
+        const res = response.data;
+        if(res.code == 200){
+          this.$store.commit('savePubKey', res.body.publicKey);
+        }
+      })
     }
   }
 }

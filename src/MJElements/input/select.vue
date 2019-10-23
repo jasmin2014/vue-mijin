@@ -1,9 +1,19 @@
 <template>
-  <el-select v-if="!readonly || disabled" v-model="currentValue" :disabled="disabled" :placeholder="placeholder" :clearable="clearable"
-    @input="handleInput" @change="handleChange" @clear="handleClear" @visible-change="handleVisibleChange" @remove-tag="handleRemoveTag">
-    <el-option v-for="option in currentOptions" :label="option.text" :value="option.value" :key="option.value"></el-option>
+  <el-select v-if="!readonly || disabled" v-model="currentValue"
+             :disabled="disabled"
+             :placeholder="placeholder"
+             :clearable="clearable"
+             :multiple="multiple"
+             @input="handleInput"
+             @change="handleChange"
+             @clear="handleClear"
+             @visible-change="handleVisibleChange"
+             @remove-tag="handleRemoveTag">
+    <el-option v-for="option in currentOptions" :label="option.text" :value="option.value"
+               :key="option.value"></el-option>
   </el-select>
-  <el-input v-else-if="!text" v-model="displayValue" :class="readonly ? 'is-readonly' : ''" :readonly="readonly"></el-input>
+  <el-input v-else-if="!text" v-model="displayValue" :class="readonly ? 'is-readonly' : ''"
+            :readonly="readonly"></el-input>
   <span v-else>
     {{ displayValue }}
   </span>
@@ -16,9 +26,9 @@
   } from '../../api/enum'
 
   const BOOLEAN_OPTIONS = [{
-      text: '是',
-      value: true
-    },
+    text: '是',
+    value: true
+  },
     {
       text: '否',
       value: false
@@ -28,7 +38,7 @@
   export default {
     name: 'MjSelect',
     props: {
-      value: [String, Number, Boolean],
+      value: [String, Number, Boolean, Array],
       text: Boolean,
       type: {
         type: String, // enum, region, org, boolean
@@ -48,7 +58,8 @@
       placeholder: String,
       clearable: Boolean,
       noGroup: Boolean,
-      noOwner: Boolean
+      noOwner: Boolean,
+      multiple: Boolean
     },
     data() {
       return {
@@ -159,7 +170,7 @@
               this.currentOptions = res.body.map(_ => ({
                 text: _.displayName,
                 value: _.enumKey
-              })).filter(_ => _.value!='PP_MYSELF');
+              })).filter(_ => _.value != 'PP_MYSELF');
             } else {
               this.currentOptions = res.body.map(_ => ({
                 text: _.displayName,
@@ -167,7 +178,8 @@
               }));
             }
           }
-        }, () => {})
+        }, () => {
+        })
       },
 
       //城市获取
@@ -189,7 +201,8 @@
               list: this.$deepcopy(this.currentOptions)
             });
           }
-        }, () => {})
+        }, () => {
+        })
       },
       //      getOrgList(orgType, statusEnable) {
       //        getOrgList(orgType, statusEnable).then(response => {

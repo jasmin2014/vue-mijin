@@ -70,8 +70,13 @@
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize"
-                     @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
 
     <!--结束授信 编辑额度-->
@@ -143,7 +148,7 @@
 </template>
 
 <script>
-  import {getQuotaList, getQuotaDetail, editQuota, endQuota} from '../../api/risk'
+  import {getQuotaList, getQuotaDetail, editQuota, endQuota, getCheckQuota} from '../../api/risk'
 
   export default {
     name: 'RiskUserQuotaPage',
@@ -239,38 +244,41 @@
       }
     },
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize, this.search.pageNumber)
     },
     methods: {
-      handleSearch() {
-        this.getData(1);
+      handleCurrentChange(val) {
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize, val);
       },
-      getData(index) {
+      handleSizeChange(val) {
+        this.search.pageSize = val
+        this.getData(val, this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize, this.search.pageNumber)
+      },
+      getData(pageSize, pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        search.pageNumber = index;
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
         getQuotaList(search).then(({data}) => {
           if (data.code === 200) {
             this.list = data.body.list;
             this.pageTotal = data.body.totalRecord;
-            this.search.pageNumber = data.body.pageNumber;
           }
         })
       },
       handleEnd(row) {
         this.creditQuota = {};
-        this.flag = false;
-        this.dialog = true;
-        this.creditTitle = '结束授信';
-        this.reasonLabel = '结束原因';
         this.rowId = row.creditId;
+        this.getCheckQuota(row.creditId, 'end');
       },
       handleEdit(row) {
-        this.flag = true;
-        this.dialog = true;
-        this.creditTitle = '编辑授信额度';
-        this.reasonLabel = '修改原因';
         this.rowId = row.creditId;
-        this.getQuotaDetail(row.creditId);
+        this.getCheckQuota(row.creditId, 'edit');
       },
       handleDetail(row) {
         this.$router.push({name: 'RiskUserQuotaDetail', params: {id: row.creditId}})
@@ -297,12 +305,16 @@
       getQuotaDetail(id) {
         getQuotaDetail(id).then(response => {
           const res = response.data;
-          if (res.code === 200) {
+          if (res.code == 200) {
+            this.flag = true;
+            this.dialog = true;
+            this.creditTitle = '编辑授信额度';
+            this.reasonLabel = '修改原因';
             this.creditQuota.partyMobile = res.body.partyMobile;
             this.creditQuota.partyName = res.body.partyName;
             this.creditQuota.productName = res.body.productName;
             this.creditQuota.creditAmount = res.body.creditAmount;
-            this.creditQuota.availableAmount = res.body.availableAmount;
+            this.creditQuota.availableAmount = res.body.availableAmount < 0 ? 0 : res.body.availableAmount;
             this.creditQuota.changeReason = res.body.changeReason;
             this.creditQuota.startDate = res.body.startDate;
             this.creditQuota.endDate = res.body.endDate;
@@ -321,9 +333,9 @@
               message: '修改成功'
             })
             this.dialog = false;
-            setTimeout(() =>{
-              this.getData(this.search.pageNumber);
-            },1000)
+            setTimeout(() => {
+              this.getData(this.search.pageSize, this.search.pageNumber)
+            }, 1000)
           }
         })
       },
@@ -338,13 +350,35 @@
               message: '操作成功'
             });
             this.dialog = false;
-            setTimeout(() =>{
-              this.getData(this.search.pageNumber);
-            },1000)
+            setTimeout(() => {
+              this.getData(this.search.pageSize, this.search.pageNumber)
+            }, 1000)
+          }
+        })
+      },
+      //编辑结束额度前检查
+      getCheckQuota(creditId, checkFlag) {
+        getCheckQuota(creditId).then(reponse => {
+          const res = reponse.data;
+          if (res.code == 200) {
+            if (checkFlag == 'edit') {
+              this.getQuotaDetail(this.rowId);
+            } else if (checkFlag == 'end') {
+              this.flag = false;
+              this.dialog = true;
+              this.creditTitle = '结束授信';
+              this.reasonLabel = '结束原因';
+            }
+          } else {
+            this.$confirm(res.message, '提示', {
+              confirmButtonText: '确定',
+              showCancelButton: false,
+              type: 'warning',
+              center: true
+            })
           }
         })
       }
-
     }
   }
 </script>

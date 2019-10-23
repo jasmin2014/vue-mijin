@@ -1,16 +1,16 @@
 <!--借款审核-->
 <template>
   <div class="box">
-    <el-tabs v-model="activeName" type="border-card">
-      <el-tab-pane label="全部" name="first">
-        <loan-all :nodeList="nodeList"
-                  @sign="handleSign"></loan-all>
+    <loan-all v-if="this.$route.name=='RiskLoanPage'" @sign="handleSign"></loan-all>
+    <el-tabs v-else v-model="activeName" type="border-card">
+      <el-tab-pane label="全部待办" name="first">
+        <loan-agency ref="agencyAll" :type="'all'" @sign="handleSign"></loan-agency>
       </el-tab-pane>
-      <el-tab-pane label="待办" name="second">
-        <loan-agency ref="agency" :nodeList="nodeList"></loan-agency>
+      <el-tab-pane label="我的待办" name="second">
+        <loan-agency ref="agencyMy" :type="'my'" @sign="handleSign"></loan-agency>
       </el-tab-pane>
       <el-tab-pane label="已审核" name="third">
-        <loan-audit ref="audit" :nodeList="nodeList"></loan-audit>
+        <loan-audit ref="audit" @sign="handleSign"></loan-audit>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -20,7 +20,9 @@
   import LoanAll from './loan/loanAll.vue'
   import LoanAgency from './loan/loanAgency.vue'
   import LoanAudit from './loan/loanAudit.vue'
-  import {getLoanList} from '../../api/risk'
+  import {
+    getLoanList
+  } from '../../api/risk'
 
   export default {
     name: 'RiskLoanPage',
@@ -32,15 +34,16 @@
     data() {
       return {
         activeName: this.$route.query.activeName ? this.$route.query.activeName : 'first',
-        nodeList: []   //获取审核节点
+        nodeList: [] //获取审核节点
       }
     },
     created() {
       this.getLoanList();
     },
     methods: {
-      handleSign(){
-        this.$refs['agency'].updateData();
+      handleSign() {
+        this.$refs['agencyAll'].updateData();
+        this.$refs['agencyMy'].updateData();
         this.$refs['audit'].updateData();
       },
       getLoanList() {
@@ -53,6 +56,7 @@
       }
     }
   }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -63,10 +67,11 @@
     height: 100vh;
     background: #f2f6fa;
 
-    .header, .main {
+    .header,
+    .main {
       min-width: 960px;
     }
-    & > .main {
+    &>.main {
       width: 100%;
       height: calc(100vh - 60px);
       flex-wrap: nowrap;
@@ -110,4 +115,5 @@
       }
     }
   }
+
 </style>

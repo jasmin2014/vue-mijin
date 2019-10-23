@@ -82,6 +82,10 @@ textarea:invalid {
   border-radius: 5px;
   background-color: #dadce1;
 }
+//el-table表头与内容不对齐问题
+body .el-table th.gutter{
+  display: table-cell!important;
+}
 
 //chrome自动填充去掉背景色
 input:-webkit-autofill,

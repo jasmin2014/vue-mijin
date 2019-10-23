@@ -6,38 +6,30 @@
 
         <div class="base-datas">
           <h3>
-            <span>其他信息</span>
+            <span>征信报告</span>
           </h3>
           <el-row type="flex" justify="center">
-            <mj-upload class="report-upload"
-                       v-model="otherFile1"
-                       :mode="mode"
-                       accept="image/*"
-                       :limit="5"
-                       placeholder="5M以内"
+            <mj-upload class="report-upload" v-model="otherFile1" :mode="mode" :limit="5" placeholder="10M以内"
                        text="人行征信报告"
-                       required
-                       :upload-title="'人行征信报告'"
-                       @success="handleUploadOtherOne"
+                       required :upload-title="'人行征信报告'" @success="handleUploadOtherOne"
                        @remove="handleRemoveOtherOne"></mj-upload>
           </el-row>
           <el-row type="flex" justify="center">
-            <mj-upload class="report-upload"
-                       v-model="otherFile6"
-                       :mode="mode"
-                       accept="image/*"
-                       :limit="5"
-                       placeholder="5M以内"
+            <mj-upload class="report-upload" v-model="otherFile6" :mode="mode" :limit="5" placeholder="10M以内"
                        text="配偶人行征信报告"
-                       :upload-title="'配偶人行征信报告'"
-                       @success="handleUploadOtherSix"
+                       :upload-title="'配偶人行征信报告'" @success="handleUploadOtherSix"
                        @remove="handleRemoveOtherSix"></mj-upload>
+          </el-row>
+          <el-row type="flex" justify="center" v-if="productType=='QYT_LOANS'">
+            <mj-upload class="report-upload" v-model="otherFile7" :mode="mode" :limit="10" placeholder="10M以内"
+                       text="企业征信报告"
+                       :upload-title="'企业征信报告'" @success="handleUploadCredit" @remove="handleRemoveCredit"></mj-upload>
           </el-row>
         </div>
 
         <div class="base-datas">
           <h3>
-            <span>货记卡信息</span>
+            <span>贷记卡信息</span>
           </h3>
           <el-row>
             <el-col v-if="mode !=='VIEW'" :span="1">
@@ -50,18 +42,15 @@
                 <template slot-scope="scope">
                   <el-form-item v-if="scope.row.$create || scope.row.$edit" :prop="scope.row[col.prop]">
                     <div v-if="col.type === 'input'">
-                      <mj-input v-if="col.num == false" v-model="scope.row[col.prop]"
-                                :mode="mode"></mj-input>
-                      <mj-input v-if="col.num == true" v-model="scope.row[col.prop]"
-                                :mode="mode" @blur="changeTest(index, scope.row[col.prop])"></mj-input>
+                      <mj-input v-model="scope.row[col.prop]" :mode="mode"
+                                @blur="changeTest(index, scope.row[col.prop], col, scope.row)"></mj-input>
                     </div>
                     <div v-else-if="col.type === 'select'">
                       <mj-select v-if="col.kind || col.group" v-model="scope.row[col.prop]" :kind="col.kind"
                                  :group="col.group"
                                  :mode="mode"></mj-select>
                       <mj-select v-else-if="col.region && col.prop === 'province' " v-model="scope.row[col.prop]"
-                                 :region="'86'"
-                                 :mode="mode"></mj-select>
+                                 :region="'86'" :mode="mode"></mj-select>
                       <mj-select v-else-if="col.prop === 'city'" v-model="scope.row[col.prop]"
                                  :region="scope.row['province']"
                                  :mode="mode"></mj-select>
@@ -71,11 +60,10 @@
                   <span v-else>{{scope.row[col.prop]}}</span>
                 </template>
               </el-table-column>
-              <el-table-column v-if="mode !=='VIEW'" label="操作" prop="paymentNo">
+              <el-table-column v-if="mode !=='VIEW'" align="center" label="操作">
                 <template slot-scope="scope">
                   <el-tooltip content="删除">
-                    <el-button size="small" type="danger"
-                               icon="el-icon-delete"
+                    <el-button size="small" type="danger" icon="el-icon-delete"
                                @click="handleDelCard(scope.row)"></el-button>
                   </el-tooltip>
                 </template>
@@ -95,26 +83,23 @@
           </el-row>
           <el-row>
             <el-table :data="detail.loanCentralBankDTOS" border class="table-center" style="margin-top: 20px">
-              <el-table-column v-for="(col,index) in loanCentralTable" :key="col.prop" :label="col.label">
+              <el-table-column  v-for="(col,index) in loanCentralTable" :width="col.type === 'date'? '150':''" :key="col.prop" :label="col.label">
                 <template slot-scope="scope">
-                  <el-form-item v-if="scope.row.$create || scope.row.$edit" :prop="scope.row[col.prop]">
-                    <el-date-picker v-if="col.type === 'date'" v-model="scope.row[col.prop]"
-                                    value-format="yyyy-MM-dd"
-                                    type="date" placeholder="选择日期" :disabled="mode =='VIEW'">
+                  <el-form-item  v-if="scope.row.$create || scope.row.$edit" :prop="scope.row[col.prop]">
+                    <el-date-picker v-if="col.type === 'date'" v-model="scope.row[col.prop]" value-format="yyyy-MM-dd"
+                                    type="date" placeholder="选择日期" :disabled="mode =='VIEW'"
+                                    @change="changeDate(scope.row[col.prop], col, scope.row)">
                     </el-date-picker>
                     <div v-if="col.type === 'input'">
-                      <mj-input v-if="col.num == false" v-model="scope.row[col.prop]"
-                                :mode="mode"></mj-input>
-                      <mj-input v-if="col.num == true" v-model="scope.row[col.prop]"
-                                :mode="mode" @blur="changeTest(index, scope.row[col.prop])"></mj-input>
+                      <mj-input v-model="scope.row[col.prop]" :mode="mode"
+                                @blur="changeTest(index, scope.row[col.prop], col, scope.row)"></mj-input>
                     </div>
                     <div v-else-if="col.type === 'select'">
                       <mj-select v-if="col.kind || col.group" v-model="scope.row[col.prop]" :kind="col.kind"
                                  :group="col.group"
                                  :mode="mode"></mj-select>
                       <mj-select v-else-if="col.region && col.prop === 'province' " v-model="scope.row[col.prop]"
-                                 :region="'86'"
-                                 :mode="mode"></mj-select>
+                                 :region="'86'" :mode="mode"></mj-select>
                       <mj-select v-else-if="col.prop === 'city'" v-model="scope.row[col.prop]"
                                  :region="scope.row['province']"
                                  :mode="mode"></mj-select>
@@ -124,11 +109,10 @@
                   <span v-else>{{scope.row[col.prop]}}</span>
                 </template>
               </el-table-column>
-              <el-table-column v-if="mode !=='VIEW'" label="操作" prop="paymentNo">
+              <el-table-column v-if="mode !=='VIEW'" align="center" label="操作">
                 <template slot-scope="scope">
                   <el-tooltip content="删除">
-                    <el-button size="small" type="danger"
-                               icon="el-icon-delete"
+                    <el-button size="small" type="danger" icon="el-icon-delete"
                                @click="handleDelLoanInfo(scope.row)"></el-button>
                   </el-tooltip>
                 </template>
@@ -148,27 +132,23 @@
           </el-row>
           <el-row>
             <el-table :data="detail.loanOtherDTOS" border class="table-center" style="margin-top: 20px">
-              <el-table-column v-for="(col,index) in loanOtherTable" :key="col.prop" :label="col.label">
+              <el-table-column v-for="(col,index) in loanOtherTable" :width="col.type === 'date'? '150':''" :key="col.prop" :label="col.label">
                 <template slot-scope="scope">
                   <el-form-item v-if="scope.row.$create || scope.row.$edit" :prop="scope.row[col.prop]">
-                    <el-date-picker v-if="col.type === 'date'" v-model="scope.row[col.prop]"
-                                    value-format="yyyy-MM-dd"
-                                    type="date" placeholder="选择日期"
-                                    :mode="mode" :disabled="mode =='VIEW'">
+                    <el-date-picker v-if="col.type === 'date'" v-model="scope.row[col.prop]" value-format="yyyy-MM-dd"
+                                    type="date" placeholder="选择日期" :mode="mode" :disabled="mode =='VIEW'"
+                                    @change="changeDate(scope.row[col.prop], col, scope.row)">
                     </el-date-picker>
                     <div v-if="col.type === 'input'">
-                      <mj-input v-if="col.num == false" v-model="scope.row[col.prop]"
-                                :mode="mode"></mj-input>
-                      <mj-input v-if="col.num == true" v-model="scope.row[col.prop]"
-                                :mode="mode" @blur="changeTest(index, scope.row[col.prop])"></mj-input>
+                      <mj-input v-model="scope.row[col.prop]" :mode="mode"
+                                @blur="changeTest(index, scope.row[col.prop], col, scope.row)"></mj-input>
                     </div>
                     <div v-else-if="col.type === 'select'">
                       <mj-select v-if="col.kind || col.group" v-model="scope.row[col.prop]" :kind="col.kind"
                                  :group="col.group"
                                  :mode="mode"></mj-select>
                       <mj-select v-else-if="col.region && col.prop === 'province' " v-model="scope.row[col.prop]"
-                                 :region="'86'"
-                                 :mode="mode"></mj-select>
+                                 :region="'86'" :mode="mode"></mj-select>
                       <mj-select v-else-if="col.prop === 'city'" v-model="scope.row[col.prop]"
                                  :region="scope.row['province']"
                                  :mode="mode"></mj-select>
@@ -178,11 +158,10 @@
                   <span v-else>{{scope.row[col.prop]}}</span>
                 </template>
               </el-table-column>
-              <el-table-column v-if="mode !=='VIEW'" label="操作" prop="paymentNo">
+              <el-table-column v-if="mode !=='VIEW'" label="操作" align="center">
                 <template slot-scope="scope">
                   <el-tooltip content="删除">
-                    <el-button size="small" type="danger"
-                               icon="el-icon-delete"
+                    <el-button size="small" type="danger" icon="el-icon-delete"
                                @click="handleDelOther(scope.row)"></el-button>
                   </el-tooltip>
                 </template>
@@ -192,7 +171,7 @@
         </div>
 
         <el-row type="flex" justify="center" v-if="mode !=='VIEW'" class="btn-save">
-          <el-button type="primary" @click="handleSave">保存</el-button>
+          <el-button type="primary" @click="handleSave">确认</el-button>
         </el-row>
       </el-form>
     </el-card>
@@ -202,291 +181,390 @@
 
 <script>
   import {
-    getCreCreditDetail,
-    getLoanCreditDetail,
+    getCreditDetail,
     addCreditDetail,
+    addCompletionCreditDetail,
     delCreditDebitCard,
     delCreditLoanInfo,
-    delCreditOther
-  } from '../../api/risk'
-  import * as api from '../../api/common'
+    delCreditOther,
+    getProductInfo
+  } from "../../api/risk";
+  import * as api from "../../api/common";
 
-  let BANK_CREDIT_REPORT = 'BANK_CREDIT_REPORT';
+  let BANK_CREDIT_REPORT = "BANK_CREDIT_REPORT";
   export default {
     props: {
       mode: String,
-      tag: String
+      tag: String,
+      productype: String
     },
     data() {
       return {
         type: this.tag,
+        productType: "",
+        productId: "",
+        nodeName: this.$route.query.nodeName,
         id: this.$route.params.id,
         testCreditReports: [],
         testSpouseReports: [],
+        testComCreditReports: [],
         detail: {
           debitCardDTOS: [], //货记卡
           // proofMaterialDTO: [], //征信报告
           loanCentralBankDTOS: [], //贷款货记卡
-          loanOtherDTOS: [],  //其他贷款货记卡
+          loanOtherDTOS: [], //其他贷款货记卡
           bankCreditReport: [], //人行征信报告
           spouseBankCreditReport: [], //配偶征信报告
-          type: ''
+          companyBankCreditReport: [], //企业征信报告
+          type: ""
         },
         //货记卡信息
         debitCardTable: [
           {
-            label: '*持卡人',
-            prop: 'cardholder',
-            type: 'input',
-            // readyOnly: true,
-            num: false,
+            label: "*持卡人",
+            prop: "cardholder",
+            type: "select",
+            kind: this.$enum.CARDHOLDER,
+            group: this.$enum.CARDHOLDER
           },
           {
-            label: '*持卡总数',
-            prop: 'cardNum',
-            type: 'input',
-            // readyOnly: true
-            num: true,
+            label: "*持卡总数",
+            prop: "cardNum",
+            type: "input",
+            reg: /^[1-9]\d*$/,
+            msg: "请输入正整数"
           },
           {
-            label: '*授信额度',
-            prop: 'creditAmount',
-            type: 'input',
-            num: true,
-            // readyOnly: true
+            label: "*授信额度",
+            prop: "creditAmount",
+            type: "input",
+            reg: /^([1-9][0-9]*(\.[0-9]{1,2})?|0\.[1-9][0-9]{0,1}|0\.[0-9][1-9])$/,
+            msg: "请输入大于0的数字，最多两位小数"
           },
           {
-            label: '*使用额度',
-            prop: 'useAmount',
-            type: 'input',
-            num: true,
+            label: "*使用额度",
+            prop: "useAmount",
+            type: "input",
+            reg: /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/,
+            msg: "请输入大于等于0的数字，最多两位小数"
           },
           {
-            label: '*还款情况',
-            prop: 'repayStatus',
-            type: 'input',
-            num: false,
+            label: "*还款情况",
+            prop: "repayStatus",
+            type: "input",
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           }
         ],
         //贷款信息（央行报告）
         loanCentralTable: [
           {
-            label: '*发放机构',
-            prop: 'issuingAgency',
-            type: 'input',
-            num: false,
-            // readyOnly: true
+            label: "*发放机构",
+            prop: "issuingAgency",
+            type: "input",
+            valid: true,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           },
           {
-            label: '*贷款类型',
-            prop: 'loanType',
-            type: 'select',
+            label: "贷款类型",
+            prop: "loanType",
+            type: "select",
             kind: this.$enum.LOAN_TYPE_CREDIT,
-            group: this.$enum.LOAN_INFORMATION,
-            num: false,
-            // readyOnly: true
+            group: this.$enum.LOAN_INFORMATION
           },
           {
-            label: '*存续情况',
-            prop: 'subsist',
-            type: 'select',
+            label: "存续情况",
+            prop: "subsist",
+            type: "select",
             kind: this.$enum.CONTINUITY,
-            group: this.$enum.LOAN_INFORMATION,
-            num: false,
-            // readyOnly: true
+            group: this.$enum.LOAN_INFORMATION
           },
           {
-            label: '*贷款金额',
-            prop: 'loanAmount',
-            type: 'input',
-            num: true,
+            label: "*贷款金额(元)",
+            prop: "loanAmount",
+            type: "input",
+            valid: true,
+            reg: /^([1-9][0-9]*(\.[0-9]{1,2})?|0\.[1-9][0-9]{0,1}|0\.[0-9][1-9])$/,
+            msg: "请输入大于0的数字，最多两位小数"
           },
           {
-            label: '*发放日期',
-            prop: 'issuanceDate',
-            type: 'date'
+            label: "发放日期",
+            prop: "issuanceDate",
+            type: "date",
+            valid: false
           },
           {
-            label: '*期限（月)',
-            prop: 'term',
-            type: 'input',
-            num: true,
+            label: "期限（月)",
+            prop: "term",
+            isReady: true
           },
           {
-            label: '*到期日期',
-            prop: 'expirationDate',
-            type: 'date'
+            label: "到期日期",
+            prop: "expirationDate",
+            type: "date",
+            valid: false
           },
           {
-            label: '*剩余本金',
-            prop: 'surplusPrincipal',
-            type: 'input',
-            num: true,
+            label: "*剩余本金",
+            prop: "surplusPrincipal",
+            type: "input",
+            valid: true,
+            reg: /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/,
+            msg: "请输入大于等于0的数字，最多两位小数"
           },
           {
-            label: '*还款情况',
-            prop: 'repayStatus',
-            type: 'input',
-            num: false,
+            label: "还款情况",
+            prop: "repayStatus",
+            type: "input",
+            valid: false,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           },
           {
-            label: '*账户状态',
-            prop: 'accountState',
-            type: 'select',
-            kind: this.$enum.ACCOUNT_STATE_CREDIT,
-            group: this.$enum.LOAN_INFORMATION,
+            label: "账户状态",
+            prop: "accountState",
+            type: "input",
+            valid: false,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           }
         ],
         // 贷款信息（其他)
         loanOtherTable: [
           {
-            label: '*发放机构',
-            prop: 'issuingAgency',
-            type: 'input',
-            num: false,
-            // readyOnly: true
+            label: "*发放机构",
+            prop: "issuingAgency",
+            type: "input",
+            valid: true,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           },
           {
-            label: '*贷款类型',
-            prop: 'loanType',
-            type: 'select',
+            label: "贷款类型",
+            prop: "loanType",
+            type: "select",
             kind: this.$enum.LOAN_TYPE_CREDIT,
-            group: this.$enum.LOAN_INFORMATION,
-            // readyOnly: true
+            group: this.$enum.LOAN_INFORMATION
           },
           {
-            label: '*存续情况',
-            prop: 'subsist',
-            type: 'select',
+            label: "存续情况",
+            prop: "subsist",
+            type: "select",
             kind: this.$enum.CONTINUITY,
-            group: this.$enum.LOAN_INFORMATION,
-            // readyOnly: true
+            group: this.$enum.LOAN_INFORMATION
           },
           {
-            label: '*贷款金额',
-            prop: 'loanAmount',
-            type: 'input',
-            num: true,
+            label: "*贷款金额(元)",
+            prop: "loanAmount",
+            type: "input",
+            valid: true,
+            reg: /^([1-9][0-9]*(\.[0-9]{1,2})?|0\.[1-9][0-9]{0,1}|0\.[0-9][1-9])$/,
+            msg: "请输入大于0的数字，最多两位小数"
           },
           {
-            label: '*发放日期',
-            prop: 'issuanceDate',
-            type: 'date'
+            label: "发放日期",
+            prop: "issuanceDate",
+            type: "date",
+            valid: false
           },
           {
-            label: '*期限（月)',
-            prop: 'term',
-            type: 'input',
-            num: true,
+            label: "期限（月)",
+            prop: "term",
+            isReady: true
           },
           {
-            label: '*到期日期',
-            prop: 'expirationDate',
-            type: 'date'
+            label: "到期日期",
+            prop: "expirationDate",
+            type: "date",
+            valid: false
           },
           {
-            label: '*剩余本金',
-            prop: 'surplusPrincipal',
-            type: 'input',
-            num: true,
+            label: "*剩余本金",
+            prop: "surplusPrincipal",
+            type: "input",
+            valid: true,
+            reg: /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/,
+            msg: "请输入大于等于0的数字，最多两位小数"
           },
           {
-            label: '*还款情况',
-            prop: 'repayStatus',
-            type: 'input',
-            num: false,
+            label: "还款情况",
+            prop: "repayStatus",
+            type: "input",
+            valid: false,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           },
           {
-            label: '*账户状态',
-            prop: 'accountState',
-            type: 'select',
-            kind: this.$enum.ACCOUNT_STATE_CREDIT,
-            group: this.$enum.LOAN_INFORMATION,
+            label: "账户状态",
+            prop: "accountState",
+            type: "input",
+            valid: false,
+            reg: /^.{1,20}$/,
+            msg: "最多输入20个字"
           }
         ],
         cardCount: 0,
         loanCount: 0,
         otherCount: 0,
         rules: {}
-      }
+      };
     },
     watch: {
-      'detail.bankCreditReport'(val) {
+      "detail.bankCreditReport"(val) {
         if (val) {
           this.detail.bankCreditReport = val;
         }
       },
-      'detail.spouseBankCreditReport'(val) {
+      "detail.spouseBankCreditReport"(val) {
         this.detail.spouseBankCreditReport = val;
       },
-      'detail.debitCardDTOS'(val) {
+      "detail.companyBankCreditReport"(val) {
+        this.detail.companyBankCreditReport = val;
+      },
+      "detail.debitCardDTOS"(val) {
         if (val) {
           this.detail.debitCardDTOS = val;
         }
       },
-      'detail.loanCentralBankDTOS'(val) {
+      "detail.loanCentralBankDTOS"(val) {
         this.detail.loanCentralBankDTOS = val;
       },
-      'detail.loanOtherDTOS'(val) {
+      "detail.loanOtherDTOS"(val) {
         this.detail.loanOtherDTOS = val;
-      },
+      }
     },
     computed: {
       otherFile1: {
         get() {
-          return this.detail.bankCreditReport.map((_, index) => ({
-            id: index,
-            name: _.name,
-            url: _.fileUri,
-            type: _.fileType,
-            kind: _.kind
-          }));
+          return this.detail.bankCreditReport
+            .filter(_ => _.kind === this.$enum.BANK_CREDIT_REPORT)
+            .map((_, index) => ({
+              id: index,
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType,
+              kind: _.kind
+            }));
         },
         set(val) {
-          this.detail.bankCreditReport = val.map(_ => ({
-            name: _.name,
-            fileUri: _.url,
-            kind: this.$enum.BANK_CREDIT_REPORT,
-            fileType: _.type
-          }));
+          this.detail.bankCreditReport =
+            val.filter(_ => _.kind !== this.$enum.COM_CREDIT_AUTHORIZATION)
+              .map(_ => ({
+                name: _.name,
+                fileUri: _.fileUri,
+                kind: this.$enum.BANK_CREDIT_REPORT,
+                fileType: _.type
+              }));
         }
       },
       otherFile6: {
         get() {
-          return this.detail.spouseBankCreditReport.map((_, index) => ({
-            id: index,
-            name: _.name,
-            url: _.fileUri,
-            type: _.fileType,
-            kind: _.kind
-          }));
+          return this.detail.spouseBankCreditReport
+            .filter(_ => _.kind === this.$enum.SPOUSE_BANK_CREDIT_REPORT)
+            .map((_, index) => ({
+              id: index,
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType,
+              kind: _.kind
+            }));
         },
         set(val) {
-          this.detail.spouseBankCreditReport = val.map(_ => ({
-            name: _.name,
-            fileUri: _.fileUri,
-            kind: this.$enum.SPOUSE_BANK_CREDIT_REPORT,
-            fileType: _.type
-          }));
+          this.detail.spouseBankCreditReport =
+            val.filter(_ => _.kind !== this.$enum.SPOUSE_BANK_CREDIT_REPORT)
+              .map(_ => ({
+                name: _.name,
+                fileUri: _.fileUri,
+                kind: this.$enum.SPOUSE_BANK_CREDIT_REPORT,
+                fileType: _.type
+              }));
         }
       },
+      otherFile7: {
+        get() {
+          return this.detail.companyBankCreditReport
+            .filter(_ => _.kind === this.$enum.COM_CREDIT_AUTHORIZATION)
+            .map((_, index) => ({
+              id: index,
+              name: _.name,
+              url: _.fileUri,
+              type: _.fileType,
+              kind: _.kind
+            }));
+        },
+        set(val) {
+          this.detail.companyBankCreditReport =
+            val.filter(_ => _.kind !== this.$enum.SPOUSE_BANK_CREDIT_REPORT)
+              .map(_ => ({
+                name: _.name,
+                fileUri: _.fileUri,
+                kind: this.$enum.COM_CREDIT_AUTHORIZATION,
+                fileType: _.type
+              }));
+        }
+      }
     },
     created() {
-      this.getData();
+      this.productId = this.$route.query.id;
+      this.getProductInfo(this.productId);
     },
     methods: {
-      getData() {
-        if (this.type == 'credit') {
-          this.getCreCreditDetail(this.id);
-        } else if (this.type == 'loan') {
-          this.getLoanCreditDetail(this.id);
+      changeDate(prop, col, row) {
+        if (row.issuanceDate && row.expirationDate) {
+          var reg = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
+          const begin = row.issuanceDate.match(reg);
+          const end = row.expirationDate.match(reg);
+          var d1 = new Date(row.issuanceDate.replace(/\-/g, "/"));
+          var d2 = new Date(row.expirationDate.replace(/\-/g, "/"));
+          if (row.issuanceDate != "" && row.expirationDate != "" && d1 >= d2) {
+            this.$message({
+              type: "warning",
+              message: "到期日期不得小于发放日期"
+            });
+            return;
+          }
+          let count = 0;
+          //年份不相同
+          if (Number(end[1]) > Number(begin[1])) {
+            //年份月份都大于的情况
+            const year = Number(end[1]) - Number(begin[1]); //年份比较
+            if (Number(end[2]) > Number(begin[2])) {
+              //月份比较
+              const day = Number(end[2]) - Number(begin[2]);
+              count = year * 12 + day;
+            } else {
+              //月份小于的情况
+              const day2 = Number(begin[2]) - Number(end[2]);
+              count = year * 12 - day2;
+            }
+          } else {
+            //年份相同的情况
+            count = Number(end[2]) - Number(begin[2]);
+            count = count == 0 ? 1 : count;
+          }
+          row.term = count.toString();
+        } else {
+          row.term = "";
         }
+      },
+      // 获取产品类型
+      getProductInfo(id) {
+        getProductInfo(id).then(res => {
+          if (res.data.code == 200) {
+            this.productType = res.data.body.productType;
+            this.getData();
+          }
+        });
+      },
+      getData() {
+        this.getCreditDetail(this.type,this.id);
       },
       setCurrentValue(val, key) {
         if (this.detail.hasOwnProperty(key)) {
-          if (typeof val === 'object' && val instanceof Array) {
+          if (typeof val === "object" && val instanceof Array) {
             this.detail[key] = val;
-          } else if (typeof val === 'object') {
+          } else if (typeof val === "object") {
             for (const k in val) {
               if (this.detail[key].hasOwnProperty(k)) {
                 this.detail[key][k] = val[k];
@@ -497,48 +575,49 @@
           }
         }
       },
-      //其他
+      //人行征信报告
       handleUploadOtherOne(file) {
         file.kind = this.$enum.BANK_CREDIT_REPORT;
         this.testCreditReports.push(file);
       },
-      handleRemoveOtherOne(file,fileList) {
-//        this.otherFile1 = this.otherFile1.filter(_ => _.id !== file.id);
-        if(fileList.length <= 0) {
+      handleRemoveOtherOne(file, fileList) {
+        if (fileList.length <= 0) {
           this.testCreditReports = [];
-        }else{
-          let _fl1 = [], _fl2 = [], _fl2_keys = [];
+        } else {
+          let _fl1 = [],
+            _fl2 = [],
+            _fl2_keys = [];
           this.testCreditReports = [];
           fileList.forEach(item => {
-            if(item.response && item.response.key !== ''){
+            if (item.response && item.response.key !== "") {
               _fl2_keys.push(item.response.key);
               this.testCreditReports.push({
                 key: item.response.key,
                 name: item.name,
                 fileType: item.raw.type,
                 kind: this.$enum.BANK_CREDIT_REPORT
-              })
-            }else{
+              });
+            } else {
               _fl1.push(item);
             }
           });
-          if(_fl1.length > 0) {
+          if (_fl1.length > 0) {
             _fl1.forEach(item => {
               this.testCreditReports.push({
                 fileUri: item.url,
-                key:item.key,
-                kind:this.$enum.BANK_CREDIT_REPORT,
-                name:item.name,
-                fileType: item.name.split('.')[1]
-              })
-            })
+                key: item.key,
+                kind: this.$enum.BANK_CREDIT_REPORT,
+                name: item.name,
+                fileType: item.name.split(".")[1]
+              });
+            });
           }
-          if(_fl2_keys.length > 0) {
+          if (_fl2_keys.length > 0) {
             api.getPicUrls(_fl2_keys).then(res => {
-              res.data.body.forEach((_,i) => {
+              res.data.body.forEach((_, i) => {
                 this.testCreditReports[i].fileUri = _;
-              })
-            })
+              });
+            });
           }
         }
       },
@@ -547,61 +626,122 @@
         file.kind = this.$enum.SPOUSE_BANK_CREDIT_REPORT;
         this.testSpouseReports.push(file);
       },
-      handleRemoveOtherSix(file,fileList) {
-//        this.otherFile6 = this.otherFile6.filter(_ => _.id !== file.id);
-
-        if(fileList.length <= 0) {
+      handleRemoveOtherSix(file, fileList) {
+        if (fileList.length <= 0) {
           this.testSpouseReports = [];
-        }else{
-          let _fl1 = [], _fl2 = [], _fl2_keys = [];
+        } else {
+          let _fl1 = [],
+            _fl2 = [],
+            _fl2_keys = [];
           this.testSpouseReports = [];
           fileList.forEach(item => {
-            if(item.response && item.response.key !== ''){
+            if (item.response && item.response.key !== "") {
               _fl2_keys.push(item.response.key);
               this.testSpouseReports.push({
                 key: item.response.key,
                 name: item.name,
                 fileType: item.raw.type,
                 kind: this.$enum.SPOUSE_BANK_CREDIT_REPORT
-              })
-            }else{
+              });
+            } else {
               _fl1.push(item);
             }
           });
-          if(_fl1.length > 0) {
+          if (_fl1.length > 0) {
             _fl1.forEach(item => {
               this.testSpouseReports.push({
                 fileUri: item.url,
-                key:item.key,
-                kind:this.$enum.SPOUSE_BANK_CREDIT_REPORT,
-                name:item.name,
-                fileType: item.name.split('.')[1]
-              })
-            })
+                key: item.key,
+                kind: this.$enum.SPOUSE_BANK_CREDIT_REPORT,
+                name: item.name,
+                fileType: item.name.split(".")[1]
+              });
+            });
           }
-          if(_fl2_keys.length > 0) {
+          if (_fl2_keys.length > 0) {
             api.getPicUrls(_fl2_keys).then(res => {
-              res.data.body.forEach((_,i) => {
+              res.data.body.forEach((_, i) => {
                 this.testSpouseReports[i].fileUri = _;
-              })
-            })
+              });
+            });
           }
         }
       },
-      changeTest(index, val) {
-        if (val && !Number(val)) {
-          this.$message.error({
-            type: 'warning',
-            message: '请输入数字类型'
+      //企业征信报告
+      handleUploadCredit(file) {
+        file.kind = this.$enum.COM_CREDIT_AUTHORIZATION;
+        this.testComCreditReports.push(file);
+      },
+      handleRemoveCredit(file, fileList) {
+        if (fileList.length <= 0) {
+          this.testComCreditReports = [];
+        } else {
+          let _fl1 = [],
+            _fl2 = [],
+            _fl2_keys = [];
+          this.testComCreditReports = [];
+          fileList.forEach(item => {
+            if (item.response && item.response.key !== "") {
+              _fl2_keys.push(item.response.key);
+              this.testComCreditReports.push({
+                key: item.response.key,
+                name: item.name,
+                fileType: item.raw.type,
+                kind: this.$enum.COM_CREDIT_AUTHORIZATION
+              });
+            } else {
+              _fl1.push(item);
+            }
           });
-          return false;
+          if (_fl1.length > 0) {
+            _fl1.forEach(item => {
+              this.testComCreditReports.push({
+                fileUri: item.url,
+                key: item.key,
+                kind: this.$enum.COM_CREDIT_AUTHORIZATION,
+                name: item.name,
+                fileType: item.name.split(".")[1]
+              });
+            });
+          }
+          if (_fl2_keys.length > 0) {
+            api.getPicUrls(_fl2_keys).then(res => {
+              res.data.body.forEach((_, i) => {
+                this.testComCreditReports[i].fileUri = _;
+              });
+            });
+          }
+        }
+      },
+      // 数据校验
+      changeTest(index, val, col, row) {
+        if (col.valid == true) {
+          if (col.reg && !col.reg.test(val)) {
+            this.$message.error({
+              type: "warning",
+              message: col.msg
+            });
+            row[col.prop] = "";
+            return false;
+          }
+        } else {
+          if (val) {
+            if (!col.reg.test(val)) {
+              this.$message.error({
+                type: "warning",
+                message: col.msg
+              });
+              row[col.prop] = "";
+              return false;
+            }
+          }
         }
       },
       //货记卡
       handleDebitCarCreate() {
         let _item = {};
         this.debitCardTable.forEach(i => {
-          _item[i.prop] = '';
+          _item[i.prop] = "";
           _item[i.readyOnly] = false;
         });
         this.cardCount++;
@@ -616,7 +756,7 @@
             if (row.tmpId === item.tmpId) {
               this.detail.debitCardDTOS.splice(index, 1);
             }
-          })
+          });
         } else {
           this.delCreditDebitCard(row.code);
         }
@@ -625,7 +765,7 @@
       handleReportCreate() {
         let _item = {};
         this.loanCentralTable.forEach(i => {
-          _item[i.prop] = '';
+          _item[i.prop] = "";
           _item[i.readyOnly] = false;
         });
         this.loanCount++;
@@ -640,7 +780,7 @@
             if (row.tmpId == item.tmpId) {
               this.detail.loanCentralBankDTOS.splice(index, 1);
             }
-          })
+          });
         } else {
           this.delCreditLoanInfo(row.code);
         }
@@ -649,7 +789,7 @@
       handleLoanCreate() {
         let _item = {};
         this.loanOtherTable.forEach(i => {
-          _item[i.prop] = '';
+          _item[i.prop] = "";
           _item[i.readyOnly] = false;
         });
         this.otherCount++;
@@ -664,82 +804,93 @@
             if (row.tmpId == item.tmpId) {
               this.detail.loanOtherDTOS.splice(index, 1);
             }
-          })
+          });
         } else {
           this.delCreditOther(row.code);
         }
       },
+      // 确认信息
       handleSave() {
-        if (!this.otherFile1.length) {
-          this.$message.error('请上传人行征信报告!');
-          return false;
-        } else {
+        if (this.nodeName == "人工补全资料") {
           this.detail.bankCreditReport = this.testCreditReports;
           this.detail.spouseBankCreditReport = this.testSpouseReports;
-          // console.log("this.detail:",this.detail);
-          this.addCreditDetail(this.detail);
+          this.detail.companyBankCreditReport = this.testComCreditReports;
+          this.addCompletionCreditDetail(this.detail);
+        } else {
+          if (!this.testCreditReports.length) {
+            this.$message.error("请上传人行征信报告!");
+            return false;
+          } else {
+            this.detail.bankCreditReport = this.testCreditReports;
+            this.detail.spouseBankCreditReport = this.testSpouseReports;
+            this.detail.companyBankCreditReport = this.testComCreditReports;
+            this.addCreditDetail(this.detail);
+          }
         }
       },
-      //信用情况(授信)
-      getCreCreditDetail(id) {
-        getCreCreditDetail(id).then(response => {
+      //信用情况(授信/借款)
+      getCreditDetail(flowType,id) {
+        getCreditDetail(flowType,id).then(response => {
           const res = response.data;
           if (res.code === 200) {
             if (res.body) {
               this.setDataSource(res.body);
             }
           }
-        })
-      },
-      //信用情况(借款)
-      getLoanCreditDetail(id) {
-        getLoanCreditDetail(id).then(response => {
-          const res = response.data;
-          if (res.code === 200) {
-            if (res.body) {
-              this.setDataSource(res.body);
-            }
-          }
-        })
+        });
       },
       setDataSource(res) {
-//        console.log("setDataSource:",res);
         if (res.loanOtherDTOS) {
           this.detail.loanOtherDTOS = [];
           res.loanOtherDTOS.forEach(item => {
             item.$create = true;
             for (const key in item) {
-              item[key].toString();
-              item[key] = typeof item[key] === 'number' ? item[key].toString() : item[key];
+              // item[key].toString();
+              item[key] =
+                typeof item[key] === "number" ? item[key].toString() : item[key];
             }
             this.detail.loanOtherDTOS.push(item);
-          })
+          });
         }
         if (res.debitCardDTOS) {
           this.detail.debitCardDTOS = [];
           res.debitCardDTOS.forEach(item => {
             item.$create = true;
+            // this.debitCardTable.forEach(i => {
+            //   console.log(i);
+            //   if (i.prop == 'cardholder') {
+            //     console.log(i);
+            //     const card = item.cardholder;
+            //     if (card == 'CARD_OWN' || card == 'CARD_SPOUSE' || card == 'CARD_GUARANTEE' || card == '' || card == null) {
+            //       i.type = 'select';
+            //     }else {
+            //       i.type = 'input';
+            //     }
+            //   }
+            // });
             for (const key in item) {
-              item[key].toString();
-              item[key] = typeof item[key] === 'number' ? item[key].toString() : item[key];
+              // item[key].toString();
+              item[key] =
+                typeof item[key] === "number" ? item[key].toString() : item[key];
             }
             this.detail.debitCardDTOS.push(item);
-          })
+          });
         }
         if (res.loanCentralBankDTOS) {
           this.detail.loanCentralBankDTOS = [];
           res.loanCentralBankDTOS.forEach(item => {
             item.$create = true;
             for (const key in item) {
-              item[key].toString();
-              item[key] = typeof item[key] === 'number' ? item[key].toString() : item[key];
+              // item[key].toString();
+              item[key] =
+                typeof item[key] === "number" ? item[key].toString() : item[key];
             }
             this.detail.loanCentralBankDTOS.push(item);
-          })
+          });
         }
-        if(res.bankCreditReport.length > 0) {
+        if (res.bankCreditReport.length > 0) {
           this.testCreditReports = [];
-          res.bankCreditReport.forEach((item,index) => {
+          res.bankCreditReport.forEach((item, index) => {
             this.testCreditReports.push({
               fileUri: item.fileUri,
               key: item.key,
@@ -747,11 +898,11 @@
               fileType: item.fileType,
               kind: this.$enum.BANK_CREDIT_REPORT
             });
-          })
-        };
-        if(res.spouseBankCreditReport.length > 0) {
+          });
+        }
+        if (res.spouseBankCreditReport.length > 0) {
           this.testSpouseReports = [];
-          res.spouseBankCreditReport.forEach((item,index) => {
+          res.spouseBankCreditReport.forEach((item, index) => {
             this.testSpouseReports.push({
               fileUri: item.fileUri,
               key: item.key,
@@ -759,7 +910,19 @@
               fileType: item.fileType,
               kind: this.$enum.SPOUSE_BANK_CREDIT_REPORT
             });
-          })
+          });
+        }
+        if (res.companyBankCreditReport.length > 0) {
+          this.testComCreditReports = [];
+          res.companyBankCreditReport.forEach((item, index) => {
+            this.testComCreditReports.push({
+              fileUri: item.fileUri,
+              key: item.key,
+              name: item.name,
+              fileType: item.fileType,
+              kind: this.$enum.COM_CREDIT_AUTHORIZATION
+            });
+          });
         }
         this.detail = res;
       },
@@ -769,60 +932,83 @@
           const res = response.data;
           if (response.status === 201) {
             this.$message({
-              type: 'success',
-              message: '添加成功'
+              type: "success",
+              message: "添加成功"
             });
             setTimeout(() => {
               this.getData();
-            }, 1000)
+            }, 1000);
+            if (this.nodeName === "授信一审") {
+              if (
+                !this.$getLocalStorage("creditInfoConfirmed") ||
+                this.$getLocalStorage("creditInfoConfirmed") !== this.id
+              ) {
+                this.$setLocalStorage("creditInfoConfirmed", this.id);
+              }
+            }
           }
-        })
+        });
+      },
+
+      //个人补全资料-添加资料
+      addCompletionCreditDetail(params) {
+        addCompletionCreditDetail(params).then(response => {
+          const res = response.data;
+          if (response.status === 201) {
+            this.$message({
+              type: "success",
+              message: "添加成功"
+            });
+            setTimeout(() => {
+              this.getData();
+            }, 1000);
+          }
+        });
       },
       //删除货记卡
       delCreditDebitCard(code) {
         delCreditDebitCard(code, this.id).then(response => {
           if (response.status == 204) {
             this.$message({
-              type: 'success',
-              message: '删除成功'
+              type: "success",
+              message: "删除成功"
             });
             setTimeout(() => {
               this.getData();
-            }, 1000)
+            }, 1000);
           }
-        })
+        });
       },
       //删除贷款信息
       delCreditLoanInfo(code) {
         delCreditLoanInfo(code, this.id).then(response => {
           if (response.status == 204) {
             this.$message({
-              type: 'success',
-              message: '删除成功'
+              type: "success",
+              message: "删除成功"
             });
             setTimeout(() => {
               this.getData();
-            }, 1000)
+            }, 1000);
           }
-        })
+        });
       },
       //删除其他
       delCreditOther(code) {
         delCreditOther(code, this.id).then(response => {
           if (response.status == 204) {
             this.$message({
-              type: 'success',
-              message: '删除成功'
+              type: "success",
+              message: "删除成功"
             });
             setTimeout(() => {
               this.getData();
-            }, 1000)
+            }, 1000);
           }
-        })
+        });
       }
     }
-  }
-
+  };
 </script>
 
 <style lang="scss">
@@ -834,14 +1020,15 @@
     }
 
     .report-upload {
-      .el-upload-list__item, .el-upload {
+      .el-upload-list__item,
+      .el-upload {
         margin-left: 30px;
       }
     }
   }
-  .btn-save .el-button{
+
+  .btn-save .el-button {
     margin-top: 20px;
     padding: 16px 55px;
   }
-
 </style>

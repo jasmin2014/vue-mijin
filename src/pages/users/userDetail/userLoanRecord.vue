@@ -5,7 +5,8 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="申请时间">
-            <el-date-picker v-model="appDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期" end-placeholder="结束日期">
+            <el-date-picker v-model="appDate" value-format="yyyy-MM-dd" type="daterange" start-placeholder="开始日期"
+              end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
         </el-col>
@@ -24,32 +25,37 @@
     </el-form>
     <el-row>
       <el-table :data="list" border>
-        <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter" :key="index"
-          align="center"></el-table-column>
-        <el-table-column label="合同" width="120" align="center">
-          <template slot-scope="scope">
-            <el-tooltip content="查看合同" v-if="scope.row.contractUrl">
-              <el-button size="small" @click="handleDownload(scope.row)">查看合同
-              </el-button>
-            </el-tooltip>
-            <el-tooltip content="暂无合同" v-else>
-              <el-button size="small">--
-              </el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
+        <el-table-column v-for="(col, index) in table" :label="col.label" :prop="col.prop" :formatter="col.formatter"
+          :key="index" align="center"></el-table-column>
+        <!--<el-table-column label="合同" width="120" align="center">-->
+          <!--<template slot-scope="scope">-->
+            <!--<el-tooltip content="下载合同" v-if="scope.row.contractUrl">-->
+              <!--<a style="color: blue" :href="scope.row.contractUrl" download="">下载合同</a>-->
+            <!--</el-tooltip>-->
+            <!--<el-tooltip content="暂无合同" v-else>-->
+              <!--<p>&#45;&#45;</p>-->
+            <!--</el-tooltip>-->
+          <!--</template>-->
+        <!--</el-table-column>-->
         <el-table-column label="操作" width="120" align="center">
           <template slot-scope="scope">
-            <el-tooltip content="查看">
+            <el-tooltip content="查看" v-if="scope.row.status=='REPAYMENTS' || scope.row.status=='EARLY_REPAYMENT' || scope.row.status=='OVERDUE' || scope.row.status=='REIMBURSEMENT'">
               <el-button icon="el-icon-view" size="small" @click="handleDetail(scope.row)">
               </el-button>
             </el-tooltip>
+            <p v-else>--</p>
           </template>
         </el-table-column>
       </el-table>
     </el-row>
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 </template>
@@ -71,7 +77,8 @@
         },
         pageTotal: 0,
         list: [],
-        table: [{
+        table: [
+          {
             label: '借款申请编号',
             prop: 'applicationId'
           },
@@ -106,7 +113,8 @@
             prop: 'applicationTime'
           }
         ],
-        options: [{
+        options: [
+          {
           value: 1,
           label: "已认证"
         }, {
@@ -140,18 +148,27 @@
     },
     created() {
       this.search.partyId = this.$route.params.id;
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
-      handleSearch() {
-        this.getData(1);
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
       },
-      getData(index) {
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
+      handleSearch() {
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
+      },
+      getData(pageSize,pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        search.pageNumber = index;
-        loanList(search).then(({
-          data
-        }) => {
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        loanList(search).then(({data}) => {
           if (data.code == 200) {
             this.list = data.body.list;
             this.pageTotal = data.body.totalRecord;
@@ -159,16 +176,24 @@
         })
       },
       handleDetail(row) {
+        // UserLoanDetail provideLoanDetail
         this.$router.push({
-          name: "provideLoanDetail",
+          name: "UserLoanDetail",
           params: {
             id: row.applicationId
           }
         })
+
+        // const { href } = this.$router.resolve({
+        //   name: "UserLoanDetail",
+        //   params: {
+        //     id: row.applicationId
+        //   }
+        // });
+        // window.open(href, "_blank");
       },
       handleDownload(row) {
         window.open(row.contractUrl);
-        // location.href = row.contractUrl;
       }
     }
   }

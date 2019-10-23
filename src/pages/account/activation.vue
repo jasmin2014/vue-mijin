@@ -110,11 +110,6 @@
     },
     created() {
       this.actives.phone = this.$route.params.phone;
-      // this.$refs.phone.$emit('input', this.actives.phone);
-      // this.$refs.phone.$refs.input.focus();
-      // console.log('refs',this.$refs);
-      // console.log('phone',this.$refs['phone']);
-
     },
     methods: {
       //监听手机号码

@@ -26,7 +26,7 @@
         </el-col>
       </el-row>
     </el-form>
-    
+
     <el-row>
       <el-button type="primary" title="添加"  style="margin-bottom:20px;"  @click="handleAdd">添加</el-button>
       <el-table :data="list" border>
@@ -62,22 +62,28 @@
 
 
     <el-row type="flex" justify="center" class="mgt20">
-      <el-pagination layout="prev, next" :total="pageTotal" :page-size="search.pageSize" @current-change="getData"></el-pagination>
+      <el-pagination layout="sizes,total, prev, pager, next, jumper"
+                     :total="pageTotal"
+                     @current-change="handleCurrentChange"
+                     @size-change="handleSizeChange"
+                     :current-page="search.pageNumber"
+                     :page-sizes="[10, 15,20, 30,50]"
+                     :page-size="search.pageSize"></el-pagination>
     </el-row>
   </div>
 
 
 
-  
+
 </template>
 
 <script>
-  import { 
+  import {
     getWhiteList,
     deleteWhiteList,
     addWhiteList
     } from '../../api/user'
-  
+
   export default {
     name: 'WhiteList',
     components: {},
@@ -95,7 +101,8 @@
         },
         pageTotal: 0,
         list: [],
-        table: [{
+        table: [
+          {
             label: '登录手机号码',
             prop: 'mobile'
           },
@@ -122,7 +129,7 @@
               trigger: 'blur'
             },
             {
-              pattern:this.$valid.mobile,
+              pattern:this.$valid.mobile11,
               message: '请输入正确的手机号码',
               trigger: 'blur'
             }
@@ -154,11 +161,21 @@
       }
     },
     created() {
-      this.getData(1);
+      this.getData(this.search.pageSize,this.search.pageNumber)
     },
     methods: {
+      handleCurrentChange(val){
+        this.search.pageNumber = val
+        this.getData(this.search.pageSize,val);
+      },
+      handleSizeChange(val){
+        this.search.pageSize = val
+        this.getData(val,this.search.pageNumber)
+      },
+      // 查询列表
       handleSearch() {
-        this.getData(1);
+        this.search.pageNumber = 1;
+        this.getData(this.search.pageSize,this.search.pageNumber)
       },
       handleAdd() {
         this.dialog = true;
@@ -189,7 +206,7 @@
                 type: "success"
               });
               setTimeout(() => {
-                this.getData(this.search.pageNumber);
+                this.getData(this.search.pageSize,this.search.pageNumber)
               }, 1000)
             }
           })
@@ -203,19 +220,18 @@
         this.dialog = false;
         this.addAccount = {};
       },
-      getData(index) {
+      getData(pageSize,pageNum) {
         const search = this.$objFilter(this.$deepcopy(this.search), _ => _ !== '');
-        search.pageNumber = index;
-        getWhiteList(search).then(({
-          data
-        }) => {
+        search.pageSize = pageSize;
+        search.pageNumber = pageNum;
+        getWhiteList(search).then(({data}) => {
           if (data.code === 200) {
             this.list = data.body.list;
             this.pageTotal = data.body.totalRecord;
           }
         })
       },
-      
+
       // 新增白名单手机号
       addWhiteList() {
         const addAccount = this.$deepcopy(this.addAccount);
@@ -229,7 +245,7 @@
             });
             this.dialog = false;
             setTimeout(() => {
-              this.getData(this.search.pageNumber);
+              this.getData(this.search.pageSize,this.search.pageNumber)
             }, 1000)
           }
         })

@@ -6,10 +6,13 @@ import system from './modules/system.routes';
 import account from './modules/account.routes';
 import authority from './modules/authority.routes';
 import users from './modules/users.routes';
+import customer from './modules/customer.routes';
 import products from './modules/products.routes';
 import risk from './modules/risk.routes';
 import finance from './modules/finance.routes';
 import operate from './modules/operates.routes';
+import collection from './modules/collection.routes';
+import banner from './modules/banner.routes';
 
 Vue.use(Router);
 
@@ -18,10 +21,13 @@ const mainRoutes = [
   system,
   authority,
   users,
+  customer,
   products,
   risk,
   finance,
-  operate
+  operate,
+  collection,
+  banner
 ]
 
 const routes = [{

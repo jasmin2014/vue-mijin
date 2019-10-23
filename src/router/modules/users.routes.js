@@ -33,6 +33,26 @@ export default {
         auth: false,
         show: false
       }
+    },
+    {
+      path: 'userLoanDetail/:id',
+      name: 'UserLoanDetail',
+      component: () => import('@/pages/users/userLoanDetail.vue'),
+      meta: {
+        title: '借款详情',
+        auth: false,
+        show: false
+      }
+    },
+    {
+      path: 'userLoanDetail/repay/:id',
+      name: 'UserRepayList',
+      component: () => import('@/pages/users/userDetail/userRepayList.vue'),
+      meta: {
+        title: '还款明细',
+        auth: false,
+        show: false
+      }
     }
   ],
   meta: {

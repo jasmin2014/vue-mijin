@@ -1,17 +1,16 @@
 <!--授信审核-->
 <template>
   <div class="box">
-    <el-tabs v-model="activeName" type="border-card">
-      <el-tab-pane label="全部" name="first" style="overflow: scroll">
-        <credit-all :nodeList="nodeList"
-                    @sign="handleSign"></credit-all>
+    <credit-all v-if="this.$route.name=='RiskCreditAuditPage'" @sign="handleSign"></credit-all>
+    <el-tabs v-else v-model="activeName" type="border-card">
+      <el-tab-pane label="全部待办" name="first" style="overflow: scroll">
+        <credit-agency ref="agencyAll" :type="'all'" @sign="handleSign"></credit-agency>
       </el-tab-pane>
-      <el-tab-pane label="待办" name="second" style="overflow: scroll">
-        <credit-agency ref="agency"
-                       :nodeList="nodeList"></credit-agency>
+      <el-tab-pane label="我的待办" name="second" style="overflow: scroll">
+        <credit-agency ref="agencyMy" :type="'my'" @sign="handleSign"></credit-agency>
       </el-tab-pane>
       <el-tab-pane label="已审核" name="third" style="overflow: scroll">
-        <credit-audit ref="audit" :nodeList="nodeList"></credit-audit>
+        <credit-audit ref="audit" @sign="handleSign"></credit-audit>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -21,7 +20,7 @@
   import CreditAll from './credit/creditAll.vue'
   import CreditAgency from './credit/creditAgency.vue'
   import CreditAudit from './credit/creditAudit.vue'
-  import {getCreditList} from '../../api/risk'
+  import { getCreditList } from '../../api/risk'
 
   export default {
     name: 'RiskCreditAuditPage',
@@ -32,16 +31,16 @@
     },
     data() {
       return {
-        activeName:this.$route.query.activeName ? this.$route.query.activeName : 'first',
-        nodeList: []
+        activeName: this.$route.query.activeName ? this.$route.query.activeName : 'first'
       }
     },
     created() {
-      this.getCreditList();
+      // this.getCreditList();
     },
     methods: {
       handleSign() {
-        this.$refs['agency'].updateData();
+        this.$refs['agencyAll'].updateData();
+        this.$refs['agencyMy'].updateData();
         this.$refs['audit'].updateData();
       },
       getCreditList() {
@@ -54,6 +53,7 @@
       }
     }
   }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -64,10 +64,11 @@
     height: 100vh;
     background: #f2f6fa;
 
-    .header, .main {
+    .header,
+    .main {
       min-width: 960px;
     }
-    & > .main {
+    &>.main {
       width: 100%;
       height: calc(100vh - 60px);
       flex-wrap: nowrap;
@@ -111,4 +112,5 @@
       }
     }
   }
+
 </style>

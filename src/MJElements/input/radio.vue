@@ -1,5 +1,5 @@
 <template>
-  <el-radio-group v-model="currentValue" :disabled="disabled" @change="handleChange">
+  <el-radio-group v-model="currentValue" :disabled="disabled" @change="handleChange" @input="handleInput">
     <el-radio v-for="option in currentOptions" :label="option.value" :key="option.value" :border="border">{{ option.text }}</el-radio>
   </el-radio-group>
 </template>
@@ -12,7 +12,7 @@
   export default {
     name: 'MjRadio',
     props: {
-      value: String,
+      value: [String,Boolean],
       mode: String,
       options: Array,
       kind: String,

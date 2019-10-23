@@ -1,8 +1,5 @@
 // 财务管理
 import http from '../lib/http'
-import {
-  personCreditPass
-} from './risk';
 
 /** ================ 财务审核 ================ **/
 // 财务放款列表
@@ -53,6 +50,13 @@ export const downLoanManageList = (params) => {
     responseType: "blob"
   })
 };
+// 还款明细查询下载
+export const downRepayDetailList = (params) => {
+  return http.admin.get(`v1/export/ppvt-repay-record`, {
+    params: params,
+    responseType: "blob"
+  })
+};
 
 /** ================ 贷款管理 ================ **/
 //列表
@@ -79,8 +83,14 @@ export const getWaitRepayList = (params) => {
     params
   })
 };
+//还款明细查询
+export const getRepayDetailList = (params) => {
+  return http.admin.get(`v1/repay/order/records/page`, {
+    params
+  })
+};
 
-/** ================ 资金流水 ================ **/
+/** ================ 资金流水 暂用用户资金流水接口 ================ **/
 //资金账户列表
 export const getFundList = (params) => {
   return http.admin.get('v1/account/flow/_find-page-for-fund-center', {
@@ -95,12 +105,12 @@ export const getDepositList = (params) => {
 };
 
 // 资金账户信息下载
-export const downFundList = (params) => {
-  return http.admin.get(`v1/export/_account-flow`, {
-    params: params,
-    responseType: "blob"
-  })
-};
+// export const downFundList = (params) => {
+//   return http.admin.get(`v1/export/_account-flow`, {
+//     params: params,
+//     responseType: "blob"
+//   })
+// };
 
 // 资金账户信息下载
 export const downDestList = (params) => {
@@ -109,7 +119,13 @@ export const downDestList = (params) => {
     responseType: "blob"
   })
 };
-
+// 律信账户信息下载
+export const downLxList = (params) => {
+  return http.admin.get(`v1/export/_lawcert-account-flow`, {
+    params: params,
+    responseType: "blob"
+  })
+};
 
 /** ================ 调账管理 ================ **/
 // 调账管理（全部）列表
@@ -139,7 +155,7 @@ export const orgWithPerson = (params) => {
 // 提交调账申请
 export const adjustApply = (params) => {
   return http.admin.post('v1/fundflow/reconcile-account-application/application', params)
-}
+};
 
 // 调账信息下载
 export const downAdjustList = (params) => {
@@ -197,3 +213,95 @@ export const queryName = (mobile) => {
   return http.admin.get(`v1/fundflow/reconcile-account-application/get-person-name?mobile=${mobile}`)
 };
 
+// 手动还款记录
+export const getArtificialList = (loanApplication) => {
+  return http.admin.get(`v1/ppvt/artificial/list/${loanApplication}`)
+};
+
+// 获取账户可用余额
+export const queryAccount = (loanApplication) => {
+  return http.admin.get(`v1/ppvt/artificial/_query-account/${loanApplication}`)
+};
+
+// 还款金额
+export const calculateAccount = (params) => {
+  return http.admin.post('v1/ppvt/artificial/_calculate-account', params)
+};
+
+// 添加记录
+export const addRecord = (params) => {
+  return http.admin.post('v1/ppvt/artificial/_add', params)
+};
+
+// 线下还款全部列表
+export const allOfflineList = (params) => {
+  return http.admin.get(`v1/fundflow/offline-repayment-register/all/page`, {
+    params: params
+  })
+};
+
+// 线下还款全部列表
+export const dealOfflineList = (params) => {
+  return http.admin.get(`v1/fundflow/offline-repayment-register/doing/page`, {
+    params: params
+  })
+};
+
+// 线下还款批量调账制单
+// 批量通过接口
+export const batchOfflineAdjust = (params) => {
+  return http.admin.post(`v1/fundflow/reconcile-account-application/application/offline-repayment/patch`, params)
+};
+
+// 贷款管理信息下载
+export const downLoadOfflineList = (params) => {
+  return http.admin.get(`v1/export/offline-repayment`, {
+    params: params,
+    responseType: "blob"
+  })
+};
+
+
+/** ================ 调账管理 ================ **/
+//逾期减免确认列表 -- 全部
+export const getOverdueAllList = (params) => {
+  return http.admin.get(`v1/fundflow/overdue-remit/all/page`, {params})
+};
+//逾期减免确认列表 -- 代办
+export const getOverdueDealList = (params) => {
+  return http.admin.get(`v1/fundflow/overdue-remit/doing/page`, {params})
+};
+// 逾期减免确认 --不通过
+export const overdueFail = (remitId, refuseReason) => {
+  return http.admin.put(`v1/fundflow/overdue-remit/confirm-fail?remitId=${remitId}&refuseReason=${refuseReason}`)
+};
+// 逾期减免确认 --通过
+export const overduePass = (remitId) => {
+  return http.admin.put(`v1/fundflow/overdue-remit/confirm-pass?remitId=${remitId}`)
+};
+//逾期减免调账申请
+export const overdueApply = (remitId, memo) => {
+  return http.admin.post(`v1/fundflow/reconcile-account-application/application/overdue-remit?remitId=${remitId}&memo=${memo}`)
+};
+//逾期减免批量调账申请
+export const overdueBatchApply = (params) => {
+  return http.admin.post(`v1/fundflow/reconcile-account-application/application/overdue-remit/patch`, params)
+};
+
+/** ================ 贷款管理 ================ **/
+//账户余额管理列表
+export const getAccountBlcList = (params) => {
+  return http.admin.post(`v1/account/balance/page`, params)
+};
+//通过手机号码查询账户余额管理列表
+export const getAccountBlc = (mobile) => {
+  return http.admin.get(`v1/account/balance/mobile/${mobile}`)
+};
+//解冻-冻结账户余额
+export const putAccountBlc = (params) => {
+  return http.admin.put(`v1/account/balance`,params)
+};
+//余额更新
+export const putRefBalance = (params) => {
+  return http.admin.put(`v1/account/balance/refresh`,params)
+};

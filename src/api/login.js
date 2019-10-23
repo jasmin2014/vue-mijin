@@ -11,6 +11,8 @@ const http = axios.create({
 const appId = APP_ID; //用户中心appId
 const appSecret = APP_SECRET; //用户中心appSecret
 const uCenterBaseURL = U_CENTER_BASE_URL;
+const uCenterTenantURL = U_CENTER_TENANT_URL;
+const pubKeyAppId = "ucenter";  //获取公钥的appId
 
 // 验证用户
 export const checkPhone = (token) => {
@@ -22,7 +24,7 @@ export const checkPhone = (token) => {
 };
 
 /** =====================登录================== **/
-// 登录
+// 登录(手机号 密码)
 export const doLogin = (phone, password) => {
   return http.post(`${uCenterBaseURL}/login/phone`, {
     appId,
@@ -31,7 +33,17 @@ export const doLogin = (phone, password) => {
     phone
   })
 };
-
+// 登录(手机号 密码 短信验证码)
+export const phoneCodeLogin = (phone, password,phoneCode) => {
+  return http.post(`${uCenterBaseURL}/login/phone_pwd_code`, {
+    appId,
+    appSecret,
+    password,
+    phone,
+    phoneCode,
+    encryptFlag: true
+  })
+};
 /** =====================激活/重置================== **/
 // 发送激活/重置手机验证码
 export const sendCode = (usage, phone) => {
@@ -50,7 +62,8 @@ export const doActivate = (phone, phoneCode, password) => {
     appSecret,
     password,
     phone,
-    phoneCode
+    phoneCode,
+    encryptFlag: true
   })
 };
 
@@ -62,7 +75,12 @@ export const doResetPassword = (phone, phoneCode, newPassword) => {
     phone,
     phoneCode,
     newPassword,
-    encryptFlag: false
+    encryptFlag: true
   })
 };
+//获取加密的公钥
+export const getLoginPublicKey = () => {
+  return http.get(`${uCenterTenantURL}/app/app_id_${pubKeyAppId}/pub_key`)
+};
+
 

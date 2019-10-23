@@ -7,7 +7,7 @@ export default {
     {
       path: 'already',
       name: 'alreadyRepayList',
-      component: () => import('@/pages/finance/repay/already.vue'),
+      component: () => import('@/pages/finance/repay/alreadyList.vue'),
       meta: {
         title: '已还款信息',
         auth: false,
@@ -17,7 +17,7 @@ export default {
     {
       path: 'detail/:id',
       name: 'alreadyRepayDetail',
-      component: () => import('@/pages/finance/repay/already/detail.vue'),
+      component: () => import('@/pages/finance/repay/alreadyDetail.vue'),
       meta: {
         title: '已还款明细',
         auth: false,
@@ -27,7 +27,7 @@ export default {
     {
       path: 'wait',
       name: 'waitRepayList',
-      component: () => import('@/pages/finance/repay/wait.vue'),
+      component: () => import('@/pages/finance/repay/waitList.vue'),
       meta: {
         title: '待还款信息',
         auth: false,
@@ -37,13 +37,23 @@ export default {
     {
       path: 'detail/:id',
       name: 'waitRepayDetail',
-      component: () => import('@/pages/finance/repay/wait/detail.vue'),
+      component: () => import('@/pages/finance/repay/waitDetail.vue'),
       meta: {
         title: '待还款明细',
         auth: false,
         show: false
       }
-    }
+    },
+    {
+      path: 'detail',
+      name: 'repayDetailList',
+      component: () => import('@/pages/finance/repay/repayDetailList.vue'),
+      meta: {
+        title: '还款明细查询',
+        auth: false,
+        show: true
+      }
+    },
   ],
   meta: {
     title: '还款管理',

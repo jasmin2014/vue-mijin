@@ -1,12 +1,14 @@
-'use strict'
-const merge = require('webpack-merge')
-const prodEnv = require('./prod.env')
+"use strict";
+const merge = require("webpack-merge");
+const prodEnv = require("./prod.env");
 
 module.exports = merge(prodEnv, {
-  'process.env': {
+  "process.env": {
     NODE_ENV: '"development"'
   },
-  APP_ID: '"uc83be9ad9293507e5"',
-  APP_SECRET: '"0787ef22aa1a4e08bfc5975a1b2714c8"',
-  U_CENTER_BASE_URL: '"http://uat-ucenter.tairancloud.com/gateway/foundation-user"'
-})
+  APP_ID: '"uc02c2207d8758675d"',
+  APP_SECRET: '"e4970d3fa6c54ba194c195ac58189bcf"',
+  U_CENTER_BASE_URL: '"https://ucenter.fengdai.org/gateway/foundation-user"',
+  U_CENTER_TENANT_URL: '"https://ucenter.fengdai.org/gateway/foundation-tenant"',
+  DCP_URL: '"testcollect.fengdai.org"'
+});
